@@ -1,0 +1,45 @@
+﻿
+@model EDS.Models.KnowledgeBase
+
+@{
+    ViewBag.Title = "Knowledge Base Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row" style="margin-left:0px">
+        <button id="btnBack" class="btn btn-primary">
+            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+        </button>
+    </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Knowledge Base</h2>
+            </div>
+        </div>
+    </div>
+<div>
+    <table>        
+        <tr>
+            <td>
+                <h4 class="knowledgeBaseTitleClr"> @Model.Title </h4>                   
+            </td>               
+        </tr>
+        <tr>
+            <td class="knowledgeBaseText">
+               @Html.Raw(Model.Text)               
+            </td>
+        </tr>
+       
+    </table>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+<script type="text/javascript">    
+    $(function () {
+        $("#btnBack").click(function () {
+            window.location.href = "/KnowledgeBase/Index";});
+    });
+    </script>
+    }

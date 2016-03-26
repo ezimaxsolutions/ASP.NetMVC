@@ -1,0 +1,261 @@
+﻿@using EDS.Helpers
+@model EDS.Models.SiteModels
+
+@{
+    ViewBag.Title = "Students";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Students</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <button id="btnAdd" class="btn btn-primary">
+            <span class="glyphicon glyphicon-plus-sign"></span>&nbsp;Add Student
+        </button>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <table class="table-condensed">
+        <tr>
+            <td><b>Year</b></td>
+            <td>
+                @*ViewBag.SchoolYear*@
+                @Html.DropDownList("SchoolYearList", null, new { @class = "form-control" })
+            </td>
+        </tr>
+        <tr>
+            <td><b>District</b></td>
+            <td>
+                @ViewBag.DistrictDesc
+            </td>
+        </tr>
+        <tr>
+            <td><b>School</b></td>
+            <td>
+                @Html.DropDownList("SchoolId", null, new { @class = "form-control"})
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"></td>
+        </tr>
+    </table>
+
+    @using (Html.BeginForm("UpdateGrid", "Students", FormMethod.Get, new { id = "formUpdateGrid" }))
+    {
+        <button id="btnUpdateGrid" class="btn btn-primary">
+            <span class="glyphicon glyphicon-refresh"></span>&nbsp;Update
+        </button>
+
+        <input type="hidden" id="hiddenSchoolFilter" name="hiddenSchoolFilter" />
+        <input type="hidden" id="hiddenSchoolYearFilter" name="hiddenSchoolYearFilter" />
+    }
+
+    <hr />
+
+    @using (Html.BeginForm("Search", "Students", FormMethod.Get, new { id = "formSearch" }))
+    {
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    @Html.TextBox("searchStudent", null, new { @class = "form-control" })
+                    <span class="input-group-btn">
+                        <button id="btnSearch" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-search"></span>&nbsp;Search Students
+                        </button>
+                    </span>
+                </div><!-- /input-group -->
+            </div><!-- /.col-lg-4 -->
+        </div><!-- /.row -->
+        <br />
+        <div class="row">
+            <div class="col-lg-4">
+                <b>Students Found: @Model.Students.Count</b>
+            </div>
+        </div>
+
+        <input type="hidden" id="hiddenSchoolFilterSearch" name="hiddenSchoolFilterSearch" />
+        <input type="hidden" id="hiddenSchoolYearFilterSearch" name="hiddenSchoolYearFilterSearch" />
+    }
+
+    <br />
+
+    @{
+        WebGrid grid = new WebGrid(source: Model.Students, defaultSort: "LastName", canPage: true, rowsPerPage: 20);
+    }
+
+    @grid.GetHtml(
+        tableStyle: "table", //"gridTable",
+        headerStyle: "gridHead",
+        footerStyle: "gridFooter",
+        rowStyle: "gridRow",
+        alternatingRowStyle: "gridAltRow",
+                columns: new[] {grid.Column("FirstName","First Name" + Html.SortDirection(ref grid, "FirstName")),
+                        grid.Column("LastName", "Last Name" + Html.SortDirection(ref grid, "LastName")),
+                        grid.Column("StateId","State Id" + Html.SortDirection(ref grid, "StateId")),
+                        grid.Column("LocalId","Local Id" + Html.SortDirection(ref grid, "LocalId")),
+                        grid.Column("GradeLevel", "Grade" + Html.SortDirection(ref grid, "GradeLevel")),
+                        grid.Column("HomeSchool","Home School" + Html.SortDirection(ref grid, "HomeSchool")),
+                        grid.Column("", "",
+                            format:
+                            @<text>
+                                @Html.ActionLink("Details", "Edit", new { studentId = item.StudentId, schoolYear = ViewBag.SchoolYear })
+                                <span style="color:#c9c9c9">&nbsp;&nbsp;|&nbsp;&nbsp;</span> 
+                                @Html.Raw(String.Format("<a href='/StudentHistory/Index?StudentId={0}&cameFromTitle={1}'>Report</a>",@item.StudentId, "Students"))
+                            </text>)
+                }
+                )
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Student: <span id="spanStudentNameTitle" /></h4>
+            </div>
+            <div class="modal-body">
+                <table class="table-condensed">
+                    <tr>
+                        <td>Name </td>
+                        <td><span id="spanStudentName" /></td>
+                    </tr>
+                    <tr>
+                        <td>Grade </td>
+                        <td><span id="spanGradeLevel" /></td>
+                    </tr>
+                    <tr>
+                        <td>State Id </td>
+                        <td><span id="spanStateId" /></td>
+                    </tr>
+                    <tr>
+                        <td>Local Id </td>
+                        <td><span id="spanLocalId" /></td>
+                    </tr>
+                    <tr>
+                        <td>Home School </td>
+                        <td><span id="spanHomeSchool" /></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+
+    <script type="text/javascript">
+        $(function () {
+            if ("@ViewBag.AllowEdit" == "False") {
+                $("#btnAdd").hide();
+            }
+
+            $('#btnSearch').click(function () {
+                $('#hiddenSchoolFilterSearch').val($('#SchoolId').val());
+                $('#hiddenSchoolYearFilterSearch').val($('#SchoolYearList').val());
+                $('#formSearch').submit();
+            });
+
+
+            $('#btnUpdateGrid').click(function () {
+                updateGrid();
+            });
+
+            $('#btnAdd').click(function () {
+                window.location.href = "/Students/Create?schoolYear="+ "@ViewBag.SchoolYear";
+            });
+
+            $('#SchoolYearList').change(function () {
+                if ('@(((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)' == 'False') {
+                    UpdateSchoolByYear($('#SchoolYearList').val());
+                }
+            });
+
+        });
+
+        function updateSchoolByDistrict(districtId) {
+            $.ajax({
+                url: "/Students/RefreshSchoolByDistrict/" + districtId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#SchoolId').empty();
+                $('select#SchoolId').append('<option value="-1">--All--</option>');
+                $.each(response, function (key, ddlData) {
+                    $('select#SchoolId').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function displayDetails(displayId) {
+            $.ajax({
+                url: "/Students/Details/" + displayId,
+                type: "GET",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $("#spanStudentNameTitle").html(response.firstName + " " + response.lastName);
+                $("#spanStudentName").html(response.firstName + " " + response.lastName);
+                $("#spanGradeLevel").html(response.gradeLevel);
+                $("#spanStateId").html(response.stateId);
+                $("#spanLocalId").html(response.localId);
+                $("#spanHomeSchool").html(response.homeSchool);
+
+                $('#myModal').modal('show')
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function updateGrid() {
+            $('#hiddenSchoolFilter').val($('#SchoolId').val());
+            $('#hiddenSchoolYearFilter').val($('#SchoolYearList').val());
+            $('#formUpdateGrid').submit();
+        }
+
+        function UpdateSchoolByYear(schoolYear) {
+            $.ajax({
+                url: "/JsonService/GetSchoolByYear?schoolYear=" + schoolYear,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#SchoolId').empty();
+                $.each(response, function (key, ddlData) {
+                    $('select#SchoolId').append(
+                            '<option value="' + ddlData.Value + '">'
+                            + ddlData.Text +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+    </script>
+}

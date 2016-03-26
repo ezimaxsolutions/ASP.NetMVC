@@ -1,0 +1,38 @@
+﻿@model EDS.Models.SiteModels
+
+<table>
+@{
+    
+    int count = 0;
+    var appendDots = "...";
+    foreach (var announcement in Model.Announcements)
+    {
+        count++;
+        if (count > 3)
+        {
+            <tr>
+                <td class="divFltRght">
+                    @Html.ActionLink("More...", "Announcements", "Support")
+                </td>
+            </tr>
+            break;
+        }
+        <tr>
+            <td class="announcementTitle">
+                @announcement.Title (@announcement.CreatedDateTime.ToString("M/dd"))
+            </td>
+        </tr>
+        <tr>
+            <td class="announcementText">
+                @(announcement.Text.Length >= 200 ? announcement.Text.Substring(0, 200) + appendDots : @announcement.Text)
+            </td>
+
+        </tr>
+
+    }
+}
+
+</table>
+
+
+

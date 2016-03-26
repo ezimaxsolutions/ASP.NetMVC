@@ -1,0 +1,70 @@
+﻿@model EDS.Models.KnowledgeBase
+
+@{
+    ViewBag.Title = "Knowledge Base Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row" style="margin-left:0px">
+        <button id="btnBack" class="btn btn-primary">
+            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+        </button>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Knowledge Base</h2>
+        </div>
+    </div>
+</div>
+<div>
+    <table>
+        <tr>
+            <td>
+                <h4 class="knowledgeBaseTitleClr"> @Model.Title </h4>
+            </td>
+        </tr>
+        <tr>
+            <td class="knowledgeBaseText">
+                @Html.Raw(Model.Text)
+            </td>
+        </tr>
+    </table>
+
+    <table>
+        @if (Model.FileDetails.Count >= 1)
+        {
+            <tr>
+                <td colspan="2"><h4>Download Documents:</h4></td>
+            </tr>
+
+            foreach (var file in Model.FileDetails)
+            {
+                var ext = file.FileExtension.Replace('.', ' ').Trim();
+                <tr>
+                    <td><a class="file-icon-padding" href="@Url.Action("ViewAttachment", "KnowledgeBase", new { physicalFileName = file.PhysicalFileName, fileExtension = file.FileExtension })"><img class='attached-file-ext-@ext' /></a></td>
+                    <td>
+                        <a href="@Url.Action("ViewAttachment", "KnowledgeBase", new { physicalFileName = file.PhysicalFileName, fileExtension = file.FileExtension })">
+                            @file.OriginalFileName@file.FileExtension
+                        </a>
+                    </td>
+
+                </tr>
+
+            }
+        }
+
+
+    </table>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/app/knowledgeBase.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            knowledgeBase.backButtonClick();
+            knowledgeBase.displayExtensionIcons();
+        });
+    </script>
+}

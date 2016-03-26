@@ -1,0 +1,58 @@
+﻿@model IEnumerable<EDS.tblSchool>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.SchoolDesc)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CreateDatetime)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ChangeDatetime)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.tblAddress.Address1)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.tblDistrict.DistrictDesc)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.SchoolDesc)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.CreateDatetime)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ChangeDatetime)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.tblAddress.Address1)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.tblDistrict.DistrictDesc)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.SchoolId }) |
+            @Html.ActionLink("Details", "Details", new { id=item.SchoolId }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.SchoolId })
+        </td>
+    </tr>
+}
+
+</table>

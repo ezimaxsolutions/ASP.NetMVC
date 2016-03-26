@@ -1,0 +1,303 @@
+﻿@using EDS.Helpers
+@model EDS.Models.AssessmentClassScoreViewModel
+
+@{
+    ViewBag.Title = "Class Score";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    WebGrid grid;
+    List<WebGridColumn> webGridColumns;
+    string topHeaderColumns = "";
+    string rawDetailUrl = "";
+    int columnCount = 0;
+    int recordCount = 0;
+    bool isUserATeacher = ((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher;
+    int defaultColSpan = 0;
+}
+
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Assessment Class Score</h2>
+        </div>
+    </div>
+</div>
+
+<hr />
+<div id="divLoading">
+    <img class='loaderImage' src='@Url.Content("~/Content/Images/loaderImg.gif")' />
+</div>
+
+<div>
+    @using (Html.BeginForm("Search", "AssessmentClassScore", FormMethod.Get, new { id = "formAssessmentScore" }))
+    {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div>
+        @if (ViewBag.Message != null)
+            {
+            <div id="divMessage">@Html.Raw(ViewBag.Message)</div>
+            }
+        <br />
+    </div>
+
+    <table class="table-condensed">
+        <tr>
+            <td nowrap=""><b>@Html.LabelFor(m => m.DistrictName)</b></td>
+            <td>
+                @Html.DisplayFor(m => m.DistrictName)
+            </td>
+        </tr>
+        <tr>
+            <td nowrap=""><b>@Html.LabelFor(m => m.SchoolYearId)</b></td>
+
+            <td>
+                @Html.DropDownListFor(m => m.SchoolYearId, new SelectList(Model.SchoolYears, "Value", "Text"), new { @class = "form-control", @id = "ddlYear" })
+                @Html.ValidationMessageFor(m => m.SchoolYearId)
+            </td>
+        </tr>
+        <tr>
+            <td nowrap=""><b>School</b></td>
+
+            <td>
+                @Html.DropDownListFor(m => m.SchoolId, new SelectList(Model.DropDown.School.SchoolItems, "Value", "Text"), new { @class = "form-control", @id = "ddlSchool" })
+                @Html.ValidationMessageFor(m => m.SchoolId)
+            </td>
+        </tr>
+        <tr>
+            <td nowrap=""><b>Teacher</b></td>
+
+            <td>
+                @Html.DropDownListFor(m => m.TeacherId, Model.DropDown.Teacher.TeacherItems, new { @class = "form-control", @id = "ddlTeacher" })
+                @Html.ValidationMessageFor(m => m.TeacherId)
+            </td>
+        </tr>
+        <tr>
+            <td nowrap=""><b>Class</b></td>
+
+            <td>
+                @Html.DropDownListFor(m => m.ClassId, Model.DropDown.SchoolClass.ClassItems, new { @class = "form-control", @id = "ddlClass" })
+                @Html.ValidationMessageFor(m => m.ClassId)
+            </td>
+        </tr>
+        <tr>
+            <td nowrap=""><b>@Html.LabelFor(m => m.SubjectID)</b></td>
+
+            <td>
+                @Html.DropDownListFor(m => m.SubjectID, new SelectList(Model.Subjects, "Value", "Text"), new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.SubjectID)
+            </td>
+        </tr>
+        <tr>
+            <td nowrap=""><b>@Html.LabelFor(m => m.AssessmentTypeId)</b></td>
+
+            <td>
+                @Html.DropDownListFor(m => m.AssessmentTypeId, new SelectList(Model.Assessment, "Value", "Text"), new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.AssessmentTypeId)
+            </td>
+        </tr>
+        <tr>
+            <td nowrap=""><b>@Html.LabelFor(m => m.SchoolTermId)</b></td>
+
+            <td>
+                @Html.DropDownListFor(m => m.SchoolTermId, new SelectList(Model.SchoolTerms, "Value", "Text"), new { @class = "form-control", @id = "ddlSchoolTerm" })
+                @Html.ValidationMessageFor(m => m.SchoolTermId)
+            </td>
+        </tr>
+    </table>
+    <hr />
+    <div style="margin-left:127px;" class="row">
+        <div class="col-lg-4">
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <button id="btnSearchAssessmentClassScore" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-search"></span>&nbsp;Search Class Score
+                    </button>
+                </span>
+            </div><!-- /input-group -->
+        </div><!-- /.col-lg-4 -->
+    </div><!-- /.row -->
+
+
+    }
+</div>
+
+<div>
+    @functions {
+        string GenerateTopHeaderForAssessment(EDS.Models.ClassScoreData scoreData, bool hasChildren, string detailUrl, int defaultColSpan)
+        {
+            string templateHtmlElement = "<td class='col-assessment-header' colspan='" + defaultColSpan + "' align='center'><u><b><a href='{0}&AssessmentTypeId={1}'>{2}</a></b></u></td>";
+
+            string headerColumn = string.Empty;
+            if (hasChildren)
+            {
+                headerColumn = string.Format(templateHtmlElement,
+                    detailUrl,
+                    scoreData.AssessmentTypeId,
+                    scoreData.AssessmentCode);
+            }
+            else
+            {
+                headerColumn = "<td class='col-assessment-header' colspan='" + defaultColSpan + "' align='center'><u><b>" + scoreData.AssessmentCode + "</b></u></td>";
+            }
+            return headerColumn;
+        }
+    }
+    <br />
+    @{
+
+        if (Model.ScoresDetails != null && Model.ScoresDetails.Count > 0)
+        {
+            <br />
+            <div id="divSuccessMessage"></div>
+            <br />
+            recordCount = Model.ScoresDetails.Count;
+
+            /***INITIALIZATION OF DISPLAY DATA*******************************/
+            int fixedColumnsCount = 1; //student
+            int assessmentColumnsCount = 2; //score, Target
+            defaultColSpan = assessmentColumnsCount;
+            if (isUserATeacher)
+            {
+                assessmentColumnsCount = 1; //score
+                defaultColSpan = 1;
+            }
+            columnCount = fixedColumnsCount + (Model.ScoresDetails[0].ScoreDataCollection.Count * assessmentColumnsCount);
+            //string detailTitle = Model.ScoresDetails[0].ScoreData1.AssessmentDesc;
+
+            /***INITIALIZATION OF WEB GRID WITH COLUMN DEFINITIONS**************/
+            grid = new WebGrid(source: Model.ScoresDetails, canPage: false, canSort:false);
+            string projectionTitle = ViewBag.Projection;
+
+
+            dynamic routeValues = new
+                {
+                    SubjectID = ViewBag.SubjectID,
+                    SchoolYearId = ViewBag.SchoolYearId,
+                    TeacherID = ViewBag.TeacherID,
+                    ClassID = ViewBag.ClassID,
+                    AssessmentTypeId = ViewBag.AssessmentTypeId,
+                    SchoolTermId = ViewBag.SchoolTermId,
+                    ReportTemplateId = ViewBag.ReportTemplateId,
+                    SchoolId = ViewBag.SchoolId
+                };
+
+            rawDetailUrl = Url.Action("Search", "AssessmentClassScore", routeValues);
+
+            topHeaderColumns = "<tr class='row-assessment-headers'><td class='col-assessment-header'>&nbsp;</td>";
+
+            webGridColumns = new List<WebGridColumn>();
+            var colStudent = grid.Column("LastName", "Student",
+                @<text>
+                    <label class="col-student-label">@item.StudentName</label>
+                </text>,
+            "col-student");
+            webGridColumns.Add(colStudent);
+
+            /*Generating group of columns for each assessment*/
+            var inputTextHtml = "<input class='{0}' type='text' scoreId='{1}' score='{2}' target='{3}' scoreMin='{4}' scoreMax='{5}' studentId='{6}' assessmentId='{7}' value='{8}' gradeLevel='{9}'/>";
+            for (int i = 1; i <= Model.ScoresDetails[0].ScoreDataCollection.Count; i++)
+            {
+                var index = i - 1;
+                var innerColCss = i > 1 ? "inner" : "first";
+
+                topHeaderColumns += GenerateTopHeaderForAssessment(Model.ScoresDetails[0].ScoreDataCollection[index], false, rawDetailUrl, defaultColSpan);
+
+                var scoreColumn = grid.Column("ScoreDataCollection[" + index + "].Score", "Score", null, "column-cell col-score-" + innerColCss);
+                scoreColumn.Format = @<text>@Html.Raw(string.Format(inputTextHtml, "cellScoreEditor", item.ScoreDataCollection[index].AssessmentScoreId, item.ScoreDataCollection[index].ScoreDisplay, 0, item.ScoreDataCollection[index].ScoreMin, item.ScoreDataCollection[index].ScoreMax, item.ScoreDataCollection[index].StudentId, item.ScoreDataCollection[index].AssessmentId, item.ScoreDataCollection[index].ScoreDisplay, item.ScoreDataCollection[index].GradeLevel))</text>;
+                webGridColumns.Add(scoreColumn);
+
+                if (!isUserATeacher)
+                {
+                    var projectionColumn = grid.Column("ScoreDataCollection[" + index + "].Projection", projectionTitle, null, "column-cell col-projection-" + innerColCss);
+                    projectionColumn.Format = @<text>@Html.Raw(string.Format(inputTextHtml, "cellTargetEditor", item.ScoreDataCollection[index].AssessmentScoreId, 0, item.ScoreDataCollection[index].ProjectionDisplay, item.ScoreDataCollection[index].ScoreMin, item.ScoreDataCollection[index].ScoreMax, item.ScoreDataCollection[index].StudentId, item.ScoreDataCollection[index].AssessmentId, item.ScoreDataCollection[index].ProjectionDisplay, item.ScoreDataCollection[index].GradeLevel))</text>;
+                    webGridColumns.Add(projectionColumn);
+                }
+            }
+            topHeaderColumns += "</tr>";
+
+
+
+            <div class="grid-container">
+                @grid.GetHtml(
+                    tableStyle: "grid-report assessmentClassScoreGrid",
+                    headerStyle: "row-report-columns",
+                    rowStyle: "row-normal",
+                    alternatingRowStyle: "row-alternate",
+                    columns: webGridColumns
+                )
+            </div>
+
+            <div class="clearfix"></div>
+            <br />
+            <div>
+                <div class="col-lg-2" style="padding-left:2px;">
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="btnSaveEditedRecords" class="btn btn-primary">
+                                <span class="glyphicon glyphicon-save"></span>&nbsp;Save Edited Records
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4" style="padding-left:2px;">
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="btnCancel" class="btn btn-primary">
+                                <span class="glyphicon glyphicon-save"></span>&nbsp;Cancel
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<div class="modal fade" id="modalMessage" tabindex="-1" role="dialog" aria-labelledby="modalMessageLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class="modal-title" id="myModalLabel">Notification!</h3>
+            </div>
+            <div class="modal-body">
+                <span id="modalMessageBody"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Stylesheets{
+    <link href="@Url.Content("~/Content/AsssessmentClassScore.css")" rel="stylesheet" />
+    @Styles.Render("~/bundles/dataTablesCss")
+}
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="@Url.Content("~/Scripts/app/assessmentClassScore.js")"></script>
+    @Scripts.Render("~/bundles/dataTablesJs")
+
+    <script type="text/javascript">
+        var detailUrl = '@HttpUtility.JavaScriptStringEncode(rawDetailUrl)';
+        var headerRowTemplate = "@Html.Raw(topHeaderColumns)";
+        $(function () {
+            assessmentClassScore.onChangeOfSchoolYear();
+            assessmentClassScore.onChangeOfSchool();
+            assessmentClassScore.onChangeOfTeacher();
+            /*format the grid with header, footer, and icons*/
+            assessmentClassScore.insertHeadersToReportGrid(headerRowTemplate, '@columnCount');
+            assessmentClassScore.adjustColumnHeaderStyle('@columnCount');
+            /*edit and save/update records*/
+            assessmentClassScore.onEditingTextValue();
+            assessmentClassScore.saveEditedRecords(detailUrl);
+            assessmentClassScore.cancelEditedRecords(detailUrl);
+            assessmentClassScore.searchClassAssessmentScore();
+            assessmentClassScore.fixHeaderAndLeftColumn('@recordCount', '@columnCount');
+        });
+
+    </script>
+
+}  

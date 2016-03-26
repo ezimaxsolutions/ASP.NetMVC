@@ -1,0 +1,70 @@
+﻿@model EDS.tblImport
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+}
+
+<h2 style="float:right">Import File - Details</h2>
+
+<div class="form-horizontal" style="float:left;width:100%;margin-top:15px">
+    <br />
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.ImportId }) |
+        @Html.ActionLink("Back to List", "Index")
+    </p>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.ImportFile)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ImportFile)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReadyToProcess)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReadyToProcess)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ProcesseDateTime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ProcesseDateTime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CreateDatetime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreateDatetime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tblImportType.ImportTypeDesc)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblImportType.ImportTypeDesc)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tblUser.UserEmail)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblUser.UserEmail)
+        </dd>
+
+    </dl>
+    <br />
+    <hr />
+</div>
+

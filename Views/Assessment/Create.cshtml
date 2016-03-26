@@ -1,0 +1,138 @@
+﻿@model EDS.Models.AssessmentViewModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <h2>Add Assessment</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+@using (Html.BeginForm("Create", "Assessment", FormMethod.Post, new { id = "formAssessment" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+        <div>
+            @if (ViewBag.UserMessage != null)
+            {
+                <div style="margin-top: 8px; color: #ED7476;">@Html.Raw(ViewBag.UserMessage)</div>
+                <br/>
+            }
+        </div>
+
+        <table class="table-condensed">
+            <tr>
+                <td>
+                    <table class="table-condensed">                     
+                        <tr>
+                            <td nowrap="">
+                                <b>Subject</b>
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(m => m.SubjectId, new SelectList(Model.Subjects, "Value", "Text"), new { @class = "form-control" })
+                                @Html.ValidationMessageFor(x => x.SubjectId)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap="">
+                                <b>Assessment Type</b>
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(m => m.AssessmentTypeId, new SelectList(Model.AssessmentTypes, "Value", "Text"), new { @class = "form-control" })
+                                @Html.ValidationMessageFor(x => x.AssessmentTypeId)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap="">
+                                <b>School Year</b>
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(m => m.SchoolYearId, new SelectList(Model.SchoolYears, "Value", "Text"), new { @class = "form-control" })
+                                @Html.ValidationMessageFor(x => x.SchoolYearId)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap="">
+                                <b>School Term</b>
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(m => m.SchoolTermId, new SelectList(Model.SchoolTerms, "Value", "Text"), new { @class = "form-control" })
+                                @Html.ValidationMessageFor(x => x.SchoolTermId)
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="border-left:solid 1px #d9d9d9">&nbsp;</td>
+                <td valign="top">
+                    <table class="table-condensed">
+                       
+                        <tr>
+                            <td nowrap=""><b>Score Min</b></td>
+                            <td>
+                                @Html.TextBoxFor(m => m.ScoreMin, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(x => x.ScoreMin)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap=""><b>Score Max</b></td>
+                            <td>
+                                @Html.TextBoxFor(m => m.ScoreMax, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(x => x.ScoreMax)
+                            </td>
+                        </tr>
+                       
+                        <tr>
+                            <td nowrap="">
+                                <b>SLO Template</b>
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(m => m.SLOTemplateId, new SelectList(Model.SLOAssessmentTemplates, "Value", "Text"), new { @class = "form-control" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap="">
+                                <b>Rubric Template</b>
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(m => m.RubricTemplateId, new SelectList(Model.RubricAssessmentTemplates, "Value", "Text"), new { @class = "form-control" })
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <hr />
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <button id="btnAddUser" class="btn btn-primary">
+                                <span class="glyphicon glyphicon-save"></span>&nbsp;Add Assessment
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+}
+
+
+@section Scripts
+{
+  @Scripts.Render("~/bundles/jqueryval")
+}

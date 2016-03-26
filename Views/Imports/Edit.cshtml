@@ -1,0 +1,86 @@
+﻿@model EDS.tblImport
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+}
+
+<h2 style="float:right">Import File - Edit</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal" style="float:left;width:100%;margin-top:15px">
+        <br />
+        <p>
+            @Html.ActionLink("Back to List", "Index")
+        </p>
+        <hr />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.ImportId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ImportTypeId, "ImportTypeId", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("ImportTypeId", String.Empty)
+                @Html.ValidationMessageFor(model => model.ImportTypeId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ImportFile, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ImportFile)
+                @Html.ValidationMessageFor(model => model.ImportFile)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserId, "UserId", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("UserId", String.Empty)
+                @Html.ValidationMessageFor(model => model.UserId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ReadyToProcess, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ReadyToProcess)
+                @Html.ValidationMessageFor(model => model.ReadyToProcess)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ProcesseDateTime, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ProcesseDateTime)
+                @Html.ValidationMessageFor(model => model.ProcesseDateTime)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CreateDatetime, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CreateDatetime)
+                @Html.ValidationMessageFor(model => model.CreateDatetime)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+
+        <hr />
+    </div>
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

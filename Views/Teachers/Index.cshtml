@@ -1,0 +1,167 @@
+﻿@using EDS.Helpers
+@model EDS.Models.SiteModels
+
+@{
+    ViewBag.Title = "Teachers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<br />
+<br />
+
+<h2>Teachers</h2>
+
+<div>
+    <table class="table-condensed">
+        <tr>
+            <td><b>Year</b></td>
+            <td>
+                @ViewBag.SchoolYear
+            </td>
+        </tr>
+        <tr>
+            <td><b>District</b></td>
+            <td>
+                @Html.DropDownListFor(m => m.DropDown.District.SelectedDistrict, Model.DropDown.District.DistrictItems, new { @class = "form-control", @id = "ddlDistrict" })
+            </td>
+        </tr>
+        <tr>
+            <td><b>School</b></td>
+            <td>
+                @Html.DropDownListFor(m => m.DropDown.School.SelectedSchool, Model.DropDown.School.SchoolItems, new { @class = "form-control", @id = "ddlSchool" })
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"></td>
+        </tr>
+    </table>
+
+    @using (Html.BeginForm("UpdateGrid", "Teachers", FormMethod.Get, new { id = "formUpdateGrid" }))
+    {
+        <button id="btnUpdateGrid" class="btn btn-primary">
+            <span class="glyphicon glyphicon-refresh"></span>&nbsp;Update Grid
+        </button>
+        
+        <input type="hidden" id="hiddenDistrictFilter" name="hiddenDistrictFilter" />
+        <input type="hidden" id="hiddenSchoolFilter" name="hiddenSchoolFilter" />
+    }
+
+    <hr />
+
+    @using (Html.BeginForm("Search", "Teachers", FormMethod.Get, new { id = "formSearch" }))
+    {
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    @Html.TextBox("FirstOrLastName", null, new { @class = "form-control" })
+                    <span class="input-group-btn">
+                        <button id="btnSearch" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-search"></span>&nbsp;Search Teachers
+                        </button>
+                    </span>
+                </div><!-- /input-group -->
+            </div><!-- /.col-lg-4 -->
+        </div><!-- /.row -->
+
+        <div class="row">
+            <div class="col-lg-4">
+                Students Found: @Model.Teachers.Count
+            </div>
+        </div>
+
+        <input type="hidden" id="hiddenDistrictFilterSearch" name="hiddenDistrictFilterSearch" />
+        <input type="hidden" id="hiddenSchoolFilterSearch" name="hiddenSchoolFilterSearch" />
+    }
+
+    <br />
+
+    @{
+        WebGrid grid = new WebGrid(source: Model.Teachers, defaultSort: "LastName", canPage: true, rowsPerPage: 8);
+     }
+
+    @grid.GetHtml(
+        tableStyle: "table", //"gridTable",
+        headerStyle: "gridHead",
+        footerStyle: "gridFooter",
+        rowStyle: "gridRow",
+        alternatingRowStyle: "gridAltRow",
+                                        columns: new[] {grid.Column("FirstName","First Name" + Html.SortDirection(ref grid, "FirstName")),
+                        grid.Column("LastName", "Last Name" + Html.SortDirection(ref grid, "LastName")),
+                        grid.Column("SchoolDesc", "School" + Html.SortDirection(ref grid, "SchoolDesc"))
+                        })
+    
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <script type="text/javascript">
+        $(function () {
+            $('#btnSearch').click(function () {
+                $('#hiddenDistrictFilterSearch').val($('#ddlDistrict').val());
+                $('#hiddenSchoolFilterSearch').val($('#ddlSchool').val());
+                $('#formSearch').submit();
+            });
+
+            $('#ddlDistrict').change(function () {
+                //alert($('#ddlDistrict').val());
+                updateSchoolByDistrict($('#ddlDistrict').val())
+            });
+
+            $('#btnUpdateGrid').click(function () {
+                updateGrid();
+            });
+        });
+
+        function updateSchoolByDistrict(districtId) {
+            $.ajax({
+                url: "/Students/RefreshSchoolByDistrict/" + districtId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#ddlSchool').empty();
+                $('select#ddlSchool').append('<option value="-1">--All--</option>');
+                $.each(response, function (key, ddlData) {
+                    $('select#ddlSchool').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function displayDetails(displayId) {
+            $.ajax({
+                url: "/Students/Details/" + displayId,
+                type: "GET",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $("#spanStudentNameTitle").html(response.firstName + " " + response.lastName);
+                $("#spanStudentName").html(response.firstName + " " + response.lastName);
+                $("#spanGradeLevel").html(response.gradeLevel);
+                $("#spanStateId").html(response.stateId);
+                $("#spanLocalId").html(response.localId);
+                $("#spanHomeSchool").html(response.homeSchool);
+
+                $('#myModal').modal('show')
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function updateGrid() {
+            $('#hiddenDistrictFilter').val($('#ddlDistrict').val());
+            $('#hiddenSchoolFilter').val($('#ddlSchool').val());
+            $('#formUpdateGrid').submit();
+        }
+    </script>
+}

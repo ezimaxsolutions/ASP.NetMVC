@@ -1,0 +1,108 @@
+﻿@model EDS.Models.KnowledgeBase
+
+@{
+    ViewBag.Title = "CreateKnowledgeBaseItem";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    HtmlHelper.ClientValidationEnabled = false;
+}
+<style>
+    .field-validation-error {
+        display:block;
+    }
+</style>
+
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <button id="btnBack" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+                        </button>
+                    </td>
+                    <td>
+                        <h2>Add New Knowledge Base Item</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<hr />
+@using (Html.BeginForm("CreateKnowledgeBaseItem", "KnowledgeBase", FormMethod.Post, new { id = "formKnowledgeBase", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+
+
+        <table class="table-condensed" id="tblKnowledgeBase">
+            <tbody>
+                <tr>
+                    <td nowrap="">
+                        <b>Title</b>
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Title)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td nowrap="">
+                        <b>Text</b>
+                    </td>
+                    <td>
+                        @Html.EditorFor(m => m.Text)
+                        @Html.ValidationMessageFor(model => model.Text)
+                    </td>
+                </tr>
+                <tr>
+                    <td nowrap>
+                        <b>Select Role</b>
+                    </td>
+                    <td>
+                        @Html.DropDownList("RoleId", null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.RoleId)
+                    </td>
+                </tr>              
+                <tr>
+                    <td nowrap="">
+                        <b>Upload Files</b>
+                    </td>
+                    <td>                      
+                        @Html.TextBoxFor(m => m.Files, new { type = "file", @placeholder = "pdf, docx and xlxs", @class = "form-control" })
+                        <a style="margin-left:10px" href="javascript:void(0);" id="lnkAddFiles">Add more files</a>
+                        @Html.ValidationMessageFor(model => model.Files)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="btn-save-item">
+            <button class="btn btn-primary" >
+                Save Item
+            </button>
+        </div>
+
+
+    </div>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/scripts/tinymce/tinymce.min.js"></script>
+    <script src="~/Scripts/app/attachmentModule.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            attachmentModule.initializeTinyMCE();
+            attachmentModule.addFiles();
+            attachmentModule.removeFiles();
+            attachmentModule.backButtonClick();
+        });
+    </script>
+}

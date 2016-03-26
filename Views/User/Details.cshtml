@@ -1,0 +1,91 @@
+﻿@model EDS.tblUser
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>tblUser</h4>
+	<hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.UserEmail)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.UserEmail)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StateId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StateId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LocalId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LocalId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AspNetUserId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AspNetUserId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CreateDatetime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreateDatetime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ChangeDatetime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ChangeDatetime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tblRole.RoleDesc)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblRole.RoleDesc)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.UserId }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

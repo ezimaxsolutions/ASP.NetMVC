@@ -1,0 +1,40 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+}
+
+
+<div style="float:left">
+    <br />
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+    <hr />
+    @{
+
+        WebGrid grid = new WebGrid(Model, canPage: true,rowsPerPage:8);
+
+    }
+
+
+
+    @grid.GetHtml(
+                tableStyle: "gridTable",
+            headerStyle: "gridHead",
+            footerStyle: "gridFooter",
+            rowStyle: "gridRow",
+            alternatingRowStyle: "gridAltRow",
+            columns: new[] {
+    grid.Column("tblSchool.SchoolDesc","School"),
+    grid.Column(("ClassDesc"), "Class"),
+     grid.Column("tblSubject.SubjectDesc","Subject"),
+    grid.Column("Grade", "Grade"),
+    grid.Column(("tblSchoolYear.SchoolYearDesc"), "School Year"),
+    grid.Column("","Actions",format: @<text>
+        @Html.ActionLink("Edit", "Edit", new { id = item.ClassId }) |
+        @Html.ActionLink("Details", "Details", new { id = item.ClassId }) |
+        @Html.ActionLink("Delete", "Delete", new { id = item.ClassId })
+    </text>)
+
+})
+
+</div>

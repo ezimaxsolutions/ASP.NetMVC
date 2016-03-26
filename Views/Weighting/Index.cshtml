@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "Weighting Summary";
+    Layout = "~/Views/Shared/_LayoutReports.cshtml";
+}
+@model EDS.Models.WeightingModel
+
+@functions
+{
+    string GetRowBackgroundColor(bool isEven)
+    {
+        if (!isEven)
+        {
+            return "#FFFFFF";
+        }
+        else
+        {
+            return "#F9F9F9";
+        }
+    }
+}
+<div style="background: #EEEEEE; width: 100%; border-image: url('/content/images/light_gray_dropshadow.png') repeat;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12" style="padding-left:20px;">
+                <h1>Weighting Summary</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3" style="padding-left:20px;">
+                <b>School Year</b><br />
+                @Html.DropDownListFor(m => m.DropDown.Year.SelectedYear, Model.DropDown.Year.YearItems, new { @class = "form-control", @id = "ddlYear" })
+                @Html.ValidationMessageFor(m => m.DropDown.Year.SelectedYear)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12" style="padding-left:20px;">
+                <label id="ErrorMessage" class="text-danger" style="padding-top:5px;padding-left:1px"></label>
+            </div>
+        </div>
+        <div>
+            <div style="float: left;">
+                @using (Html.BeginForm("UpdateGrid", "Weighting", FormMethod.Get, new { id = "formUpdateGrid" }))
+                {
+                    <div class="row">
+                        <div class="col-lg-12" style="padding-left:20px;padding-bottom:20px;">
+                            <button id="btnUpdateGrid" class="btn btn-primary" style="width:150px;">
+                                @*<span class="glyphicon glyphicon-refresh"></span>*@&nbsp;Update
+                            </button>
+                            <br />
+                        </div>
+                    </div>
+                    <input type="hidden" id="hiddenYearFilter" name="hiddenYearFilter" />
+                }
+            </div>
+            <div style="float: right; margin:0px 0px 10px 0px;">
+                @if (((EDS.Models.SiteUser)Session["SiteUser"]).isEdsAdministrator)
+                {
+                    <a class="btn btn-primary" style="text-decoration:none;" href="@Url.Action("Create")">Add Weighting</a>
+                }
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<div class="container">
+    <div style="background: #58595B;color:white;">
+        <h2 style="color:white;padding-left:10px;padding-top:10px;">Weighting Summary</h2>
+        <div class="row" style="padding-left:10px;padding-bottom:10px">
+            <div class="col-lg-3"><b>District:</b> @Model.DistrictName</div>
+            <div class="col-lg-3"><b>School Year:</b> @Model.SchoolYear</div>
+            <div class="col-lg-3"><b>Report Date:</b> @DateTime.Today.ToShortDateString()</div>
+        </div>
+    </div>
+    <div class="form-horizontal" style="float:left;width:100%;">
+        <table style="width:100%">
+            <tr style="background: #231F20;color:white;">
+                <td style="width:1%;">&nbsp;</td>
+                <td style="width:20%;"><b>Grade</b></td>
+                <td style="width:40%;"><b>Subject</b></td>
+                <td style="width:20%;"><b>Assessment Type</b></td>
+                <td style="text-align:right;width:18%"><b>Weighting</b></td>
+                <td style="width:1%;">&nbsp;</td>
+            </tr>
+            @{
+                var prevGrade = -1;
+                bool isEven = false;
+                var prevSubject = string.Empty;
+                var prevAssementType = string.Empty;
+                var kinderGarten = "K";
+
+                foreach (EDS.Models.Weighting summary in @Model.SummaryList)
+                {
+                    if (prevGrade != -1 && prevGrade != @summary.GradeLevel)
+                    {
+                        <tr style="background:@GetRowBackgroundColor(isEven);">
+                            <td colspan="11" style="border-bottom:solid"> </td>
+                        </tr>
+                        isEven = !isEven;
+                    }
+                    else if (prevSubject != string.Empty && prevSubject != @summary.SubjectDesc)
+                    {
+                        <tr style="background:@GetRowBackgroundColor(isEven);">
+                            <td colspan="11" style="border-bottom: solid thin"> </td>
+                        </tr>
+                    }
+
+                    <tr style="background:@GetRowBackgroundColor(isEven);">
+                        <td> </td>
+                        @{
+                    if (prevGrade != summary.GradeLevel)
+                    {
+                        prevGrade = summary.GradeLevel;
+                        <td>@((summary.GradeLevel == 0) ? kinderGarten : summary.GradeLevel.ToString())</td>
+                    }
+                    else
+                    {
+                        <td> </td>
+                    }
+                    prevSubject = @summary.SubjectDesc;
+                    prevAssementType = @summary.AssessmentCode;
+                        }
+
+                        <td>@summary.SubjectDesc</td>
+                        <td>@summary.AssessmentCode</td>
+                        <td style="text-align:right">@summary.Weight.ToString("0.0")%</td>
+                        <td> </td>
+                    </tr>
+                }
+
+            }
+            <tr><td colspan="7">&nbsp;</td></tr>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            &copy; 2014 Education Data Solutions, Inc. - All Rights Reserved
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+
+    <script type="text/javascript">
+        $(function () {
+            $('#btnUpdateGrid').click(function () {
+                if (validateForm()) {
+
+                    $('#hiddenYearFilter').val($('#ddlYear').val());
+                    $('#formSearch').submit();
+                    $('#ErrorMessage').text("");
+                    updateGrid();
+                }
+                else {
+                    $('#ErrorMessage').text("All values are required");
+                    return false;
+                }
+            });
+        });
+
+        function updateGrid() {
+
+            $('#hiddenYearFilter').val($('#ddlYear').val());
+            $('#formUpdateGrid').submit();
+        }
+
+        function validateForm() {
+            var formIsValid = true;
+            $('select').each(function () {
+                if (this.value == -1) {
+                    formIsValid = false;
+                }
+            });
+            return formIsValid;
+        }
+
+    </script>
+}

@@ -1,0 +1,71 @@
+﻿@model EDS.tblClass
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+}
+
+<h2 style="float:right">Class - Details</h2>
+
+<div class="form-horizontal" style="float:left;width:100%">
+    <br />
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.ClassId }) |
+        @Html.ActionLink("Back to List", "Index")
+    </p>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            Class Description
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ClassDesc)
+        </dd>
+
+        <dt>
+            Grade
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Grade)
+        </dd>
+
+        <dt>
+            Date Created
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreateDatetime)
+        </dd>
+
+
+        <dt>
+            School
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblSchool.SchoolDesc)
+        </dd>
+
+        <dt>
+            School Year
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblSchoolYear.SchoolYearDesc)
+        </dd>
+
+        <dt>
+            Subject
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblSubject.SubjectDesc)
+        </dd>
+
+    </dl>
+  
+    <hr />
+</div>
+

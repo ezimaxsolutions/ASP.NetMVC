@@ -1,0 +1,249 @@
+﻿@{
+    ViewBag.Title = "Assessment Detail Report";
+    Layout = "~/Views/Shared/_LayoutReports.cshtml";
+}
+@model EDS.Models.TIRDetailModel
+@using EDS.Helpers
+
+@{
+    /***INITIALIZATION OF DISPLAY DATA*******************************/
+    int fixedColumnsCount = 2; //id, student
+    int assessmentColumnsCount = 4; //score, projection, impact, percentile
+    int columnCount = fixedColumnsCount + (Model.AssessmentList.Count() * assessmentColumnsCount);
+    string detailTitle = Model.ReportType + " Assessment - " + Model.Subject;
+    var toggleText = ViewBag.ViewScaledScore == true ? "View Raw Scores" : "View Scaled Scores";
+    ViewBag.ViewScaledScore = !ViewBag.ViewScaledScore;
+
+    decimal[] impactSums = ViewBag.impactSums;
+    var studentCounts = ViewBag.studentCounts;
+    decimal[] avgImpacts = ViewBag.avgImpacts;
+
+    var controllerName = ViewBag.ShowToggleButton == false ? "HeirarchicalTeacherDetailReport" : "TeacherDetailReport";
+    var viewScaledScore = ViewBag.ShowToggleButton == false ? false : ViewBag.ViewScaledScore;
+
+    var rawDetailUrl = Url.Action("AssessmentDetail", controllerName, new
+    {
+        subject = ViewBag.subject,
+        year = ViewBag.Year,
+        assessmentTypeDesc = ViewBag.AssessmentTypeDesc,
+        teacher = ViewBag.Teacher,
+        classid = ViewBag.ClassID,
+        grade = ViewBag.Grade,
+        viewScaledScore = viewScaledScore,
+        summaryCount = ViewBag.SummaryCount,
+        Race = ViewBag.Race,
+        Gender = ViewBag.Gender,
+        FrlIndicator = ViewBag.FrlIndicator,
+        IEPIndicator = ViewBag.IEPIndicator,
+        LEPIndicator = ViewBag.LEPIndicator,
+        Hispanic = ViewBag.Hispanic,
+        assessmentTypeId = ViewBag.AssessmentTypeId,
+        reportTemplateId = ViewBag.ReportTemplateId,
+        cameFromTitle = detailTitle
+    });
+
+    var templateFiles = string.Empty;
+    var sloFileName = Model.details[0].SLOFileName;
+    var rubricFileName = Model.details[0].RubricFileName;
+    if (!string.IsNullOrEmpty(sloFileName))
+    {
+        templateFiles = "<a id='linkSLO' class='file-icon-padding' href='#'><img src='" + Url.Content("~/content/icons/pdf.ico") + "'/>SLO</a>";
+    }
+    if (!string.IsNullOrEmpty(rubricFileName))
+    {
+        templateFiles += "<a id='linkRubric' class='file-icon-padding' href='#'><img src='" + Url.Content("~/content/icons/pdf.ico") + "'/>Rubric</a>";
+    }
+
+
+    /***INITIALIZATION OF WEB GRID WITH COLUMN DEFINITIONS**************/
+    WebGrid grid = new WebGrid(source: Model.details, defaultSort: "LastName", canPage: false);
+    string projectionTitle = ViewBag.Projection;
+    string percentileTitle = ViewBag.DistPercentile;
+
+    List<WebGridColumn> webGridColumns = new List<WebGridColumn>();
+    var colID = grid.Column("LocalId", "ID" + Html.SortDirection(ref grid, "LocalId"), null, "col-id");
+    webGridColumns.Add(colID);
+    var colStudent = grid.Column("LastName", "Student" + Html.SortDirection(ref grid, "LastName"),
+        @<text>
+            @Html.ActionLink((string)item.StudentName, "Index", "StudentHistory", new { StudentId = item.StudentId, cameFromTitle = detailTitle, showRawScale = !ViewBag.ViewScaledScore, summaryCount = ViewBag.SummaryCount}, null)
+        </text>,
+            "col-student");
+    webGridColumns.Add(colStudent);
+    for (int i = 1; i <= Model.AssessmentList.Count; i++)
+    {
+        var innerColCss = i > 1 ? "inner" : "first";
+        var scoreColumn = grid.Column("ScoreData" + i + ".Score", "Score" + Html.SortDirection(ref grid, "ScoreData" + i + ".Score"), null, "col-score-" + innerColCss);
+        if (i == 1) { scoreColumn.Format = (item) => item.ScoreData1.ScoreDisplay; }
+        if (i == 2) { scoreColumn.Format = (item) => item.ScoreData2.ScoreDisplay; }
+        if (i == 3) { scoreColumn.Format = (item) => item.ScoreData3.ScoreDisplay; }
+        if (i == 4) { scoreColumn.Format = (item) => item.ScoreData4.ScoreDisplay; }
+        if (i == 5) { scoreColumn.Format = (item) => item.ScoreData5.ScoreDisplay; }
+        webGridColumns.Add(scoreColumn);
+
+        var projectionColumn = grid.Column("ScoreData" + i + ".Projection", projectionTitle + Html.SortDirection(ref grid, "ScoreData" + i + ".Projection"), null, "col-projection-" + innerColCss);
+        if (i == 1) { projectionColumn.Format = (item) => item.ScoreData1.ProjectionDisplay; }
+        if (i == 2) { projectionColumn.Format = (item) => item.ScoreData2.ProjectionDisplay; }
+        if (i == 3) { projectionColumn.Format = (item) => item.ScoreData3.ProjectionDisplay; }
+        if (i == 4) { projectionColumn.Format = (item) => item.ScoreData4.ProjectionDisplay; }
+        if (i == 5) { projectionColumn.Format = (item) => item.ScoreData5.ProjectionDisplay; }
+        webGridColumns.Add(projectionColumn);
+
+        var impactColumn = grid.Column("ScoreData" + i + ".Impact", "+/-" + Html.SortDirection(ref grid, "ScoreData" + i + ".Impact"), null, "col-impact col-meet-exceed-" + innerColCss);
+        if (i == 1)
+        {
+            impactColumn.Format = (@<text>@item.ScoreData1.ImpactDisplay<div class="meet-exceed-arrow meet-exceed-arrow-@item.ScoreData1.MeetExceedValue">&nbsp;</div></text>);
+        }
+        if (i == 2)
+        {
+            impactColumn.Format = (@<text>@item.ScoreData2.ImpactDisplay<div class="meet-exceed-arrow meet-exceed-arrow-@item.ScoreData2.MeetExceedValue">&nbsp;</div></text>);
+        }
+        if (i == 3)
+        {
+            impactColumn.Format = (@<text>@item.ScoreData3.ImpactDisplay<div class="meet-exceed-arrow meet-exceed-arrow-@item.ScoreData3.MeetExceedValue">&nbsp;</div></text>);
+        }
+        if (i == 4)
+        {
+            impactColumn.Format = (@<text>@item.ScoreData4.ImpactDisplay<div class="meet-exceed-arrow meet-exceed-arrow-@item.ScoreData4.MeetExceedValue">&nbsp;</div></text>);
+        }
+        if (i == 5)
+        {
+            impactColumn.Format = (@<text>@item.ScoreData5.ImpactDisplay<div class="meet-exceed-arrow meet-exceed-arrow-@item.ScoreData5.MeetExceedValue">&nbsp;</div></text>);
+        }
+        webGridColumns.Add(impactColumn);
+
+        if (ViewBag.ShowPercentile == true)
+        {
+            var percentileColumn = grid.Column("ScoreData" + i + ".Percentile", percentileTitle + Html.SortDirection(ref grid, "ScoreData" + i + ".Percentile"), null, "col-percentile col-endof-assessment col-percentile-" + innerColCss);
+            if (i == 1) { percentileColumn.Format = (item) => item.ScoreData1.PercentileDisplay; }
+            if (i == 2) { percentileColumn.Format = (item) => item.ScoreData2.PercentileDisplay; }
+            if (i == 3) { percentileColumn.Format = (item) => item.ScoreData3.PercentileDisplay; }
+            if (i == 4) { percentileColumn.Format = (item) => item.ScoreData4.PercentileDisplay; }
+            if (i == 5) { percentileColumn.Format = (item) => item.ScoreData5.PercentileDisplay; }
+            webGridColumns.Add(percentileColumn);
+        }
+        if (ViewBag.ShowGrowth == true)
+        {
+            var growthColumn = grid.Column("ScoreData" + i + ".Growth", percentileTitle + Html.SortDirection(ref grid, "ScoreData" + i + ".Growth"), null, "col-growth col-endof-assessment col-growth-" + innerColCss);
+            if (i == 1) { growthColumn.Format = (item) => item.ScoreData1.GrowthDisplay; }
+            if (i == 2) { growthColumn.Format = (item) => item.ScoreData2.GrowthDisplay; }
+            if (i == 3) { growthColumn.Format = (item) => item.ScoreData3.GrowthDisplay; }
+            if (i == 4) { growthColumn.Format = (item) => item.ScoreData4.GrowthDisplay; }
+            if (i == 5) { growthColumn.Format = (item) => item.ScoreData5.GrowthDisplay; }
+            webGridColumns.Add(growthColumn);
+        }
+    }
+}
+
+@{Html.RenderAction("Breadcrum", new {currentViewTitle = detailTitle });}
+
+<div class="container">
+    @*Begin Report Header*@
+    <div class="report-header">
+        <div class="row report-title">
+            <div class="col-lg-7"><h2 style="color:white;">@detailTitle</h2> </div>
+            @if (ViewBag.ShowToggleButton == true)
+            {
+                <div class="col-lg-2 detail-report-toggle" ><button id="btnToggleValues" style="width: 150px" class="btn btn-primary"><span id="toggleText">@toggleText.ToString()</span></button>&nbsp; &nbsp;</div>
+            }
+        </div>
+        <div class="row report-column-headers">
+            @Html.Partial("_ReportFilter", (EDS.Models.ReportFilterViewModel)ViewBag.ReportFilters)
+        </div>
+    </div>
+    @*End Report Header*@
+
+    @grid.GetHtml(
+            tableStyle: "grid-report tirDetailGrid",
+            headerStyle: "row-report-columns",
+            rowStyle: "row-normal",
+            alternatingRowStyle: "row-alternate",
+            columns: webGridColumns
+        )
+
+    <div class="row">
+        <div class="col-lg-8">
+            &copy; 2014 Education Data Solutions, Inc. - All Rights Reserved
+        </div>
+        <div class="col-lg-4" style="text-align:right;padding-right:22px">
+            <span class="meet-exceed-legent-title">Exceeds</span><div class="meet-exceed-legend meet-exceed-arrow-1 meet-exceed-arrow">&nbsp;</div>
+            <span class="meet-exceed-legent-title">Meets</span><div class="meet-exceed-legend meet-exceed-arrow-0 meet-exceed-arrow">&nbsp;</div>
+            <span class="meet-exceed-legent-title">Below</span><div class="meet-exceed-legend meet-exceed-arrow--1 meet-exceed-arrow">&nbsp;</div>
+            <span class="meet-exceed-legent-title">Unsatisfactory</span><div class="meet-exceed-legend meet-exceed-arrow--2 meet-exceed-arrow">&nbsp;</div>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalAssessmentTemplate" tabindex="-1" role="dialog" aria-labelledby="modalAssessmentLabel" aria-hidden="true">
+        <div class="modal-dialog-Assessment">
+            <div class="modal-content">
+                <div class="modal-header-assessment">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body" style="padding:0px">
+                    <div class="iframe-container">
+                        <iframe id="assessmentTempIframe"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Stylesheets{
+    <link href="~/Content/TIRDetail.css" rel="stylesheet" />
+    <link href="~/Content/Report.css" rel="stylesheet" />
+}
+@section Scripts {
+    <script src="~/Scripts/app/tirDetailReport.js"></script>
+    <script type="text/javascript">
+
+        /**************************************************************/
+        var reportType = '@Model.ReportType';
+        var detailUrl = '@HttpUtility.JavaScriptStringEncode(rawDetailUrl)';
+        /**************************************************************/
+
+        var headerRowTemplate = "<tr class='row-assessment-headers'>" +
+       "<td> </td>" +
+       "<td> </td>" +
+       @for (int i = 0; i < Model.AssessmentList.Count(); i++)
+        {
+            if (Model.AssessmentList[i].IsChildExist)
+            {
+                @: "<td class='col-assessment-header' colspan='4' align='center'><u><b><a href='" + detailUrl + "&InputTermId=@Model.AssessmentList[i].SchoolTermId'>@Model.AssessmentList[i].AssessmentDesc</a></b></u></td>" +
+                }
+            else
+            {
+                @: "<td class='col-assessment-header' colspan='4' align='center'><u><b>@Model.AssessmentList[i].AssessmentDesc</b></u></td>" +
+                }
+       }
+       "</tr>";
+        /**************************************************************/
+
+        var reportFooterTemplate = "<tfoot>" +
+        "<tr><td colspan='2' style='background: #EEEEEE;'>@Html.Raw(templateFiles)</td>" +
+        @for (int cntr=0; cntr < Model.AssessmentList.Count; cntr++)
+        {
+            string prevCategory = cntr == 0 ? "default" : Convert.ToString(Model.AssessmentList[cntr - 1].MeetExceedCategory);
+            <text>
+                    "<td colspan='4' class='footer-ribbon-color footer-ribbon-color-@Model.AssessmentList[cntr].MeetExceedCategory'>" +
+                     "<img class='footer-ribbon-arrow footer-ribbon-arrow-@prevCategory' />" +
+                    "<div style='font-weight:bold; padding:7px 0 2px 0'>AVG. IMPACT: @String.Format("{0:0.0}", avgImpacts[cntr])</div>" +
+                    "<div style='font-weight:bold'>M/E TOTAL %: @String.Format("{0:0.0}", @Model.AssessmentList[cntr].MeetExceedPerc)</div>" +
+                    "</td>" + @*<td colspan='1'  class='footer-ribbon-color footer-ribbon-color-@Model.AssessmentList[cntr].MeetExceedCategory'>"*@
+               </text>
+        }
+        "</tr></tfoot>";
+
+        /**************************************************************/
+        $(function () {
+            /*format the grid with header, footer, and icons*/
+            tirDetailReport.insertHeadersToReportGrid(headerRowTemplate, '@columnCount');
+            tirDetailReport.displayPercentSymbol('@ViewBag.ShowPercentile');
+            tirDetailReport.adjustColumnHeaderStyle();
+            tirDetailReport.appendFooterToReportGrid(reportFooterTemplate);
+            tirDetailReport.handleToggleViewScores(reportType, detailUrl);
+            tirDetailReport.displayFotterRibbonArrows();
+            tirDetailReport.viewTemplateAttachment('@sloFileName', '@rubricFileName')
+        })
+    </script>
+}

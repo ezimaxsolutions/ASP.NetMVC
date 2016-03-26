@@ -1,0 +1,20 @@
+﻿<div class="report-breadcrum">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                @{
+                    string level = string.Empty;
+                    for (int x = 0; x < ViewBag.BreadcrumNavigations.Count - 1; x++)
+                    {
+                        var item = ViewBag.BreadcrumNavigations[x];
+                        if (!item.NavUrl.ToLower().Contains("summaryreport")) { level = "&level=" + item.Level.ToString(); }
+                        <a href="@(item.NavUrl + level)">@item.Title</a><span>&nbsp;&gt;&nbsp;</span>
+                    }
+                    var item1 = ViewBag.BreadcrumNavigations[ViewBag.BreadcrumNavigations.Count - 1];
+                    if (!item1.NavUrl.ToLower().Contains("summaryreport")) { level = "&level=" + item1.Level.ToString(); }
+                    <a href="@(item1.NavUrl + level)">@item1.Title</a><span>&nbsp;&gt;&nbsp;</span>@ViewBag.CurrentViewTitle
+                }
+            </div>
+        </div>
+    </div>
+</div>

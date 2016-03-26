@@ -1,0 +1,125 @@
+﻿<div class="navbar navbar-fixed-top" style="background: #231F20;">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a href="@Url.Action("Index")"><img src="/content/images/logo.png" style="margin-top:10px" /></a>
+            }
+            else
+            {
+                <img src="/content/images/logo.png" style="margin-top:10px" />
+            }
+            <br />
+        </div>
+    </div>
+</div>
+<div class="navbar navbar-inverse" style="min-width:1150px;">
+    @{if (User.Identity.IsAuthenticated)
+    {
+        <div class="container">
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav" style="min-width:900px;">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li class="dropdown" id="menu3">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu3">Reports<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a>Student History</a></li>
+                            <li>@Html.ActionLink("Teacher Impact Report", "SummaryReport", "TeacherSummaryReport")</li>
+
+                            @*DG: 3/5/2014 (42) - Removed for March release.
+                                <li class="dropdown" id="menu4">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#menu4">Compsosite Reports<b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a>Grade Level Growth</a></li>
+                                        <li><a>School Growth</a></li>
+                                        <li><a>District Growth</a></li>
+                                    </ul>
+                                </li>*@
+
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="menu2">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu2">Assessments<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                if (((EDS.Models.SiteUser)Session["SiteUser"]).isEdsAdministrator)
+                                {
+                                    <li>@Html.ActionLink("Add Assessment", "Create", "Assessment")</li>
+                                }
+
+                                <li class="disabled"><a>Inventory</a></li>
+                                if (!((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher && !((EDS.Models.SiteUser)Session["SiteUser"]).isAdministrator)
+                                {
+                                    <li>@Html.ActionLink("Find Student Score", "Index", "AssessmentScore")</li>
+                                }
+                                if (!((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher && !((EDS.Models.SiteUser)Session["SiteUser"]).isAdministrator)
+                                {
+                                    <li>@Html.ActionLink("Find Class Score", "Index", "AssessmentClassScore")</li>
+                                }
+                                if (!((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)
+                                {
+                                    <li>@Html.ActionLink("Weighting", "Index", "Weighting")</li>
+                                }
+
+                                @*<li class="disabled"><a>Create New</a></li>
+                                     <li class="disabled"><a>Import Scores</a></li>
+                                    <li>@Html.ActionLink("Import Scores", "Index", "Imports")</li>
+                                *@
+                            }
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="menu1">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu1">
+                            District<b class="caret"></b>
+                        </a>
+                        @{
+                            if (User.Identity.IsAuthenticated)
+                            {
+                                @Html.Raw("<ul class='dropdown-menu'>");
+                                   if (!((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)
+                                    {
+                                        <li>@Html.ActionLink("Teachers / Admins", "Index", "User")</li>
+                                    }
+
+                                <li>@Html.ActionLink("Students", "Index", "Students")</li>
+
+                                if (!((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)
+                                {
+                                    <li>@Html.ActionLink("Classes", "Index", "Classes")</li>
+                                }
+                                @Html.Raw("</ul>");
+
+                            }
+                        }
+                        </li>
+                        <li class="dropdown" id="menu5">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#menu5">Support<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Announcements", "Announcements", "Support")</li>
+                                <li>@Html.ActionLink("Technical Support", "TechnicalSupport", "Support")</li>
+                                <li>@Html.ActionLink("Request A Feature", "FeatureRequest", "Support")</li>
+                                <li>@Html.ActionLink("Knowledge Base", "Index", "KnowledgeBase")</li>
+                            </ul>
+                        </li>
+                        <li class="dropdown" id="menu6">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#menu6">My Account<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Update Password", "Manage", "Account")</li>
+                            </ul>
+                        </li>
+                        <li>@Html.Partial("_LoginPartial")</li>
+                    </ul>
+                </div>
+            </div>
+    }
+    }
+</div>
+
+
+

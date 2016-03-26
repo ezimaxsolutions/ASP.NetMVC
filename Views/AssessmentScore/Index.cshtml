@@ -1,0 +1,131 @@
+﻿@using EDS.Helpers
+@using EDS.Models
+@model EDS.Models.AssessmentScoreViewModel
+
+@{
+    ViewBag.Title = "Students";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Assessment Score</h2>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    @using (Html.BeginForm("Search", "AssessmentScore", FormMethod.Get, new { id = "formAssessmentScore" }))
+    {
+        <table class="table-condensed">
+            <tr>
+                <td nowrap=""><b>@Html.LabelFor(m => m.DistrictName)</b></td>
+                <td>
+                    @Html.DisplayFor(m => m.DistrictName)
+                </td>
+            </tr>
+
+            <tr>
+                <td nowrap="">
+                    <b>@Html.LabelFor(m => m.AssessmentTypeId)</b>
+                </td>
+                <td>
+                    @Html.DropDownListFor(m => m.AssessmentTypeId, new SelectList(Model.AssessmentTypes, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.AssessmentTypeId)
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="">
+                    <b>@Html.LabelFor(m => m.SchoolYearId)</b>
+                </td>
+                <td>
+                    @Html.DropDownListFor(m => m.SchoolYearId, new SelectList(Model.SchoolYears, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.SchoolYearId)
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="">
+                    <b>@Html.LabelFor(m => m.SchoolTermId)</b>
+                </td>
+                <td>
+                    @Html.DropDownListFor(m => m.SchoolTermId, new SelectList(Model.SchoolTerms, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.SchoolTermId)
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="">
+                    <b>@Html.LabelFor(m => m.StudentName)</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(m => m.StudentName, null, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.StudentName)
+                </td>
+            </tr>
+        </table>
+
+
+        <hr />
+        <div style="margin-left:127px;" class="row">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button id="btnSearch" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-search"></span>&nbsp;Search Score
+                        </button>
+                    </span>
+                </div><!-- /input-group -->
+            </div><!-- /.col-lg-4 -->
+        </div><!-- /.row -->
+       
+    }
+
+    <br />
+    @if (Model.StudentScores != null)
+    {
+         <br />
+        <div class="row">
+            <div class="col-lg-4">
+                <b>Records Found: @Model.StudentScores.Count</b>
+            </div>
+        </div>
+        WebGrid grid = new WebGrid(source: Model.StudentScores, defaultSort: "LastName", canPage: true, rowsPerPage: 20);
+
+
+        @grid.GetHtml(
+        tableStyle: "table", //"gridTable",
+        headerStyle: "gridHead",
+        footerStyle: "gridFooter",
+        rowStyle: "gridRow",
+        alternatingRowStyle: "gridAltRow",
+                columns: new[]
+                     {
+                       
+                        grid.Column("LocalId","Local Id" + Html.SortDirection(ref grid, "LocalId")),
+                        grid.Column("FirstName","First Name" + Html.SortDirection(ref grid, "FirstName")),
+                        grid.Column("LastName", "Last Name" + Html.SortDirection(ref grid, "LastName")),
+                        grid.Column("Subject","Subject" + Html.SortDirection(ref grid, "Subject")),
+                        grid.Column("SchoolYear","School Year" + Html.SortDirection(ref grid, "SchoolYear")),
+                        grid.Column("SchoolTerm","School Term" + Html.SortDirection(ref grid, "SchoolTerm")),
+                        grid.Column("AssessmentType", "Assessment Type" + Html.SortDirection(ref grid, "AssessmentType")),
+                        grid.Column("AssessmentDesc", "Assessment Desc" + Html.SortDirection(ref grid, "AssessmentDesc")),
+                       // grid.Column("Score", "Score" + Html.SortDirection(ref grid, "Score")),
+                        grid.Column("Score", "",
+                            format:
+                            @<text>
+                                 @Html.ActionLink(item.Score == null ? "null" : ((int)item.Score).ToString(), "Edit", new { studentId = item.StudentId, schoolyear = item.SchoolYear, schoolTerm = item.SchoolTerm, assessmentType = item.AssessmentType, assessmentDesc = item.AssessmentDesc, localId = item.LocalId, subject = item.Subject })   
+                                                              
+                             </text>)
+                     }
+            )
+    }
+</div>
+
+
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,42 @@
+﻿@model IEnumerable<EDS.tblSchoolUserRole>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+}
+
+<h2 style="float:right">Teachers</h2>
+
+<div class="form-horizontal" style="float:left;width:100%;margin-top:15px">
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+    <hr style="height: 2px;background-color:navy" />
+    @{
+
+        WebGrid grid = new WebGrid(Model, canPage: true, rowsPerPage: 8);
+
+    }
+
+    @grid.GetHtml(tableStyle: "gridTable",
+            headerStyle: "gridHead",
+            footerStyle: "gridFooter",
+            rowStyle: "gridRow",
+            alternatingRowStyle: "gridAltRow", columns: new[] {
+    grid.Column("CreateDatetime","Created Date",style:"AdminGrid"),
+
+    grid.Column(("tblUser.FirstName"), "Teacher",style:"FullName"),
+    grid.Column(("tblUser.LastName"), " ",style:"FullName"),
+    grid.Column(("tblRole.RoleDesc"), "Role",style:"AdminGrid"),
+    grid.Column(("tblSchool.SchoolDesc"), "School",style:"AdminGrid"),
+    grid.Column("","Actions",format: @<text>
+        @Html.ActionLink("Edit", "Edit", new { id = item.SchoolRoleId }) |
+        @Html.ActionLink("Details", "Details", new { id = item.SchoolRoleId }) |
+        @Html.ActionLink("Delete", "Delete", new { id = item.SchoolRoleId })
+    </text>)
+
+})
+
+
+    <hr style="height: 3px;background-color:navy" />
+</div>

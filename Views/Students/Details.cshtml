@@ -1,0 +1,69 @@
+﻿@model EDS.tblStudent
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+}
+
+<h2 style="float:right">Student - Details</h2>
+
+<div class="form-horizontal" style="float: left; width: 100%; margin-top: 15px">
+
+    <br />
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.StudentId }) |
+        @Html.ActionLink("Back to List", "Index")
+    </p>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+
+        <dd>
+            <label style="font-weight:bold;margin-right:10px">First Name</label> @Html.DisplayFor(model => model.FirstName)
+        </dd>
+
+        <dd>
+            <label style="font-weight:bold;margin-right:10px">Last Name</label>
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+
+        <dd>
+            <label style="font-weight:bold;margin-right:10px">State Id</label>@Html.DisplayFor(model => model.StateId)
+        </dd>
+
+        <dd>
+            <label style="font-weight:bold;margin-right:10px">Birth Date</label> @Html.DisplayFor(model => model.BirthDate)
+        </dd>
+
+        @*<dd>
+            <label style="font-weight:bold;margin-right:10px">Gender</label> @Html.DisplayFor(model => model.Gender)
+        </dd>*@
+
+        @*<dd>
+            <label style="font-weight:bold;margin-right:10px">Ethnicity</label> @Html.DisplayFor(model => model.Ethnicity)
+        </dd>*@
+
+
+        <dd>
+            <label style="font-weight:bold;margin-right:10px">Grad Level</label> @Html.DisplayFor(model => model.GradeLevel)
+        </dd>
+
+
+        @*<dd>
+            <label style="font-weight:bold;margin-right:10px">Home Room</label> @Html.DisplayFor(model => model.Homeroom)
+        </dd>*@
+
+
+        <dd>
+            <label style="font-weight:bold;margin-right:10px">Date Created</label>@Html.DisplayFor(model => model.CreateDatetime)
+        </dd>
+
+        <dd>
+            <label style="font-weight:bold;margin-right:10px">Change Date</label> @Html.DisplayFor(model => model.ChangeDatetime)
+        </dd>
+
+    </dl>
+
+    <hr/>
+</div>
+

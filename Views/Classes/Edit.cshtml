@@ -1,0 +1,638 @@
+﻿@model EDS.tblClass
+
+@{
+    ViewBag.Title = "Edit";
+    int studentAddCheck = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["StudentsAddCheck"]);
+    int studentRemoveCheck = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["StudentsRemoveCheck"]);
+}
+
+<style type="text/css">
+    .tooltip-inner {
+        background-color: #EEEEEE;
+        color: #000;
+        border: 1px solid #808080;
+    }
+</style>
+
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <button id="btnBack" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+                        </button>
+                    </td>
+                    <td>
+                        <h2>Edit Class: @ViewBag.ClassDesc</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs">
+    <li class="active"><a href="#classTab" data-toggle="tab">Class Details</a></li>
+    <li><a href="#teacherTab" data-toggle="tab">Teachers</a></li>
+    <li><a href="#studentTab" data-toggle="tab">Students</a></li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+    <div style="float:left;"><h3>Class Details</h3></div>
+    <div style="float: right; margin:15px 0px 10px 0px;">
+        <button id="btnConfirmDelete" class="btn btn-delete">
+            <span class="glyphicon glyphicon-delete"></span>&nbsp;Delete This Class
+        </button>
+    </div>
+    <div style="clear:both;"></div>
+    <div class="tab-pane active" id="classTab">
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal">
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.ClassId)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SchoolId, "School", new { @class = "control-label col-md-1" })
+                    <div class="col-md-3">
+                        @Html.DropDownList("SchoolId", null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SchoolId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ClassDesc, "Class", new { @class = "control-label col-md-1" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.ClassDesc)
+                        @Html.ValidationMessageFor(model => model.ClassDesc)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-md-1">Year</label> 
+                    <div class="col-md-3">
+                        @Html.DropDownList("SchoolYearId", null, new { @class = "form-control"})
+                    </div>
+                    <div class="col-md-1" style="margin-top:7px;"><img title="Click on Save and Continue button to edit school year." id="imgYearHelp" src="~/content/images/help_icon.png" /></div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubjectId, "Subject", new { @class = "control-label col-md-1" })
+                    <div class="col-md-3">
+                        @Html.DropDownList("SubjectId", null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SubjectId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Grade, "Grade", new { @class = "control-label col-md-1" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.Grade)
+                        @Html.ValidationMessageFor(model => model.Grade)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-2">
+                        <button id="btnSave" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-save"></span>&nbsp;Save and Continue
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+    <div class="tab-pane" id="teacherTab">
+        <h3>Add Teachers to Class</h3>
+        <table>
+            <tr>
+                <td>
+                    <div style="float:left"><h5>All Teachers</h5></div>
+                    <div style="float:left; margin-top:7px;margin-left:4px;" class="show-toggle-link">
+                        [
+                        @Html.ActionLink((bool)ViewBag.ShowTeachersForDistrict ? "Show District Teachers" : "Show School Teachers",
+                    "Edit",
+                    new
+                    {
+                        id = Model.ClassId,
+                        defaultWizardStep = EDS.Enums.ClassWizardSteps.Teachers,
+                        showTeachersForDistrict = ViewBag.ShowTeachersForDistrict
+                    })
+                        ]
+                    </div>
+                    <div style="clear:both"></div>
+                    @Html.ListBox("AvailableTeachers", null, new { @class = "form-control", @size = "10" })
+                </td>
+                <td width="150px" align="center">
+                    <button id="btnAddTeacher" class="btn btn-primary">
+                        &nbsp;&nbsp;&nbsp;&nbsp;Add&nbsp;<span class="glyphicon glyphicon-arrow-right"></span>&nbsp;&nbsp;&nbsp;
+                    </button>
+                    <br />
+                    <br />
+                    <button id="btnRemoveTeacher" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Remove
+                    </button>
+                </td>
+                <td>
+                    <h5>Teachers in this Class</h5>
+                    @Html.ListBox("TeachersForThisClass", null, new { @class = "form-control", @size = "10" })
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="row">
+            <div class="col-lg-12">
+                <button id="btnAddTeacherToClass" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-save"></span>&nbsp;Save
+                </button> &nbsp;
+                <button id="btnAddTeacherAndContinue" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-save"></span>&nbsp;Save and Continue
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane" id="studentTab">
+        <h3>Add Students to Class</h3>
+
+        <table>
+            <tr>
+                <td>
+                    <div style="float:left"><h5>All Students</h5></div>
+                    <div style="float:left; margin-top:7px;margin-left:4px;" class="show-toggle-link">
+                        [
+                        @Html.ActionLink((bool)ViewBag.ShowStudentsForDistrict ? "Show District Students" : "Show School Students",
+                    "Edit",
+                    new
+                    {
+                        id = Model.ClassId,
+                        defaultWizardStep = EDS.Enums.ClassWizardSteps.Students,
+                        showStudentsForDistrict = ViewBag.ShowStudentsForDistrict
+                    })
+                        ]
+                    </div>
+                    <div style="clear:both"></div>
+                    @Html.ListBox("AvailableStudents", null, new { @class = "form-control", @size = "10" })
+                </td>
+                <td width="150px" align="center">
+                    <button id="btnAddStudent" class="btn btn-primary">
+                        &nbsp;&nbsp;&nbsp;&nbsp;Add&nbsp;<span class="glyphicon glyphicon-arrow-right"></span>&nbsp;&nbsp;&nbsp;
+                    </button>
+                    <br />
+                    <br />
+                    <button id="btnRemoveStudent" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Remove
+                    </button>
+                </td>
+                <td>
+                    <h5>Students in this Class</h5>
+                    @Html.ListBox("StudentsForThisClass", null, new { @class = "form-control", @size = "10" })
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="row">
+            <div class="col-lg-12">
+                <button id="btnAddStudentToClass" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-save"></span>&nbsp;Save
+                </button>&nbsp;
+                <button id="btnAddStudentAndExit" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-save"></span>&nbsp;Save and Exit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalMessage" tabindex="-1" role="dialog" aria-labelledby="modalMessageLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class="modal-title" id="modalMessageHeader"></h3>
+            </div>
+            <div class="modal-body">
+                <span id="modalMessageTitle"></span>
+                <span id="modalMessageBody"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalError" tabindex="-1" role="dialog" aria-labelledby="modalErrorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class="modal-title" id="myModalLabel">ERROR</h3>
+                See error details below.
+            </div>
+            <div class="modal-body">
+                <span id="modalErrorTitle"></span>
+                <span id="modalErrorBody"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="modalMessageLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class="modal-title" id="modalDeleteHeader"></h3>
+            </div>
+            <div class="modal-body">
+                <div><span id="modalDeleteTitle"></span></div>
+                <div>
+                    <span id="modalDeleteBody"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnDelete" class="btn btn-delete" data-dismiss="modal">Delete Class</button>
+                <button type="button" id="btnCancel" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+        var modalMessageTimeout;
+        var modalAlertTimeout;
+        var existingSudents = [];
+        var addedStudents = [];
+        var removedStudents = [];
+        var availableStudents = '@ViewBag.StudentsForThisClassCount';
+        var modalAlertTimeOut = 3000;
+        var modalWarningTimeOut = 5000;
+        var modalMessageTimeOut = 2000;
+
+
+        $(function () {
+            if ("@ViewBag.AllowEdit" == "False") {
+                $("#btnSave").hide();
+                $("#btnConfirmDelete").hide();
+                $("#btnAddTeacherToClass").hide();
+                $("#btnAddTeacherAndContinue").hide();
+                $("#btnAddStudentToClass").hide();
+                $("#btnAddStudentAndExit").hide();
+                $(".show-toggle-link").hide();
+                $("#btnAddTeacher").prop("disabled", "true");
+                $("#btnRemoveTeacher").prop("disabled", "true");
+                $("#btnAddStudent").prop("disabled", "true");
+                $("#btnRemoveStudent").prop("disabled", "true");
+                $("#SchoolId").prop("disabled", "true");
+                $("#SchoolYearId").prop("disabled", "true");
+                $("#SubjectId").prop("disabled", "true");
+
+                $('input:text').each(function () {
+                    $("#" + this.id).prop("disabled", "true")
+                });
+            }
+
+            $("input").addClass("form-control");
+
+            $("#btnBack").click(function () {
+                window.location.href = "/Classes/Index";
+            });
+
+            $("#btnAddTeacher").click(function () {
+                moveListItems("AvailableTeachers", "TeachersForThisClass", "teacher");
+            });
+
+            $("#btnRemoveTeacher").click(function () {
+                moveListItems("TeachersForThisClass", "AvailableTeachers", "teacher");
+            });
+
+            $("#btnAddTeacherToClass").click(function () {
+                saveTeacherToClass("True");
+            });
+
+            $("#btnAddTeacherAndContinue").click(function () {
+                saveTeacherToClass("False");
+            });
+
+            $("#btnAddStudent").click(function () {
+                moveListItemsStudent("AvailableStudents", "StudentsForThisClass", "ADD");
+
+            });
+
+            $("#btnRemoveStudent").click(function () {
+                moveListItemsStudent("StudentsForThisClass", "AvailableStudents", "REMOVE");
+            });
+
+            $("#btnAddStudentToClass").click(function () {
+                saveStudentToClass("True");
+            });
+
+            $("#btnAddStudentAndExit").click(function () {
+                saveStudentToClass("False");
+            });
+
+            showDefaultTab();
+
+            $('#StudentsForThisClass option').each(function () {
+                existingSudents.push(this.value);
+            });
+
+            $('#SchoolYearId').change(function () {
+                UpdateSchoolByYear($('#SchoolYearId').val());
+                if (availableStudents > 0) {
+                    showModalPopup('modalMessage', modalWarningTimeOut);
+                    $("#modalMessageHeader").html("Warning");
+                    $("#modalMessageTitle").html("");
+                    $("#modalMessageBody").html("This class already contains students. If you save this change of school year, please continue to the student tab, and verify that the students in this class are correct.");
+                }
+            });
+
+            $("#btnConfirmDelete").click(function () {
+                showDeleteConfirmationModal('modalDelete');
+            });
+
+            $("#btnDelete").click(function () {
+                DeleteClass();
+            });
+
+            $("#imgYearHelp").tooltip(
+           {
+               show: { duration: 1000 }
+           });
+
+        });
+
+
+
+        function showModalPopup(modalId, timeOut) {
+            // remove previous timeouts if it's opened more than once.
+            clearTimeout(modalMessageTimeout);
+            // hide it after a minute
+            modalMessageTimeout = setTimeout(function () {
+                $("#" + modalId).modal('hide');
+            }, timeOut); //1000 = 1 second
+            $("#" + modalId).modal('show');
+        }
+
+
+        function showDefaultTab() {
+            //url contains bookmark fragment, then it is tab to show
+            var defaultTab = window.location.hash;
+            if (defaultTab == undefined || defaultTab == '') {
+                var tabToActivate = '@ViewBag.DefaultWizardStep';
+                if (tabToActivate == '@EDS.Enums.ClassWizardSteps.Detail') {
+                    defaultTab = '#classTab';
+                }
+                if (tabToActivate == '@EDS.Enums.ClassWizardSteps.Teachers') {
+                    defaultTab = '#teacherTab';
+                }
+                if (tabToActivate == '@EDS.Enums.ClassWizardSteps.Students') {
+                    defaultTab = '#studentTab';
+                }
+            }
+            if (defaultTab != undefined && defaultTab != '') {
+                var tabItem = $('.nav-tabs a[href="' + defaultTab + '"]');
+                if (tabItem.length == 0) throw 'tab ' + defaultTab + ' not found to activate';
+                tabItem.tab('show');
+            }
+        }
+
+
+
+        function saveStudentToClass(showDialogBox) {
+            var cid = $("#ClassId").val();
+            $("#btnAddStudentToClass").prop("disabled", "true");
+            $("#btnAddStudentAndExit").prop("disabled", "true");
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/Classes/UpdateStudentsInClass",
+                data: JSON.stringify({ classId: cid, addedStudentIds: addedStudents, removedStudentIds: removedStudents }),
+                contentType: "application/json; charset=utf-8"
+            })
+            .then(
+            function (response) {
+
+                if (response == "Success") {
+                    if (addedStudents != null) {
+                        $.each(addedStudents, function (index, value) {
+                            existingSudents.push(value);
+                        });
+                    }
+                    if (removedStudents != null) {
+                        $.each(removedStudents, function (index, value) {
+                            existingSudents.pop(value);
+                        });
+                    }
+
+                    availableStudents = existingSudents.length;
+
+                    if (showDialogBox == "True") {
+                        showModalPopup('modalMessage', modalMessageTimeOut);
+                        $("#modalMessageHeader").html("Success");
+                        $("#modalMessageTitle").html("<h3>Students Successfully Saved</h3>");
+                        $("#modalMessageBody").html("Students were successfully added to the class.");
+                    } else {
+                        window.location.href = "/Classes/Index";
+                    }
+                }
+                else {
+                    $('#modalError').modal('show');
+                    $("#modalErrorTitle").html("<h3><span style='color:red'>Error Saving Students</span></h3>");
+                    $("#modalErrorBody").html(response);
+                }
+            },
+            function (xhr, status) {
+                $('#modalError').modal('show');
+                $("#modalErrorTitle").html("<h3><span style='color:red'>Error Saving Students</span></h3>");
+                $("#modalErrorBody").html(xhr.statusText + " " + xhr.status);
+            });
+            $(document).ajaxComplete(function () {
+                addedStudents = [];
+                removedStudents = [];
+                $("#btnAddStudentToClass").removeAttr("disabled");
+                $("#btnAddStudentAndExit").removeAttr("disabled");
+            });
+        }
+
+        //Added by VA for user story 68
+        //function added to move list items
+        function moveListItems(sourceid, destinationid, text) {
+            if ($("#" + sourceid).val() == null) {
+                alert("Please select a " + text + " to move.");
+                return;
+            }
+            $("#" + sourceid + "  option:selected").remove().appendTo("#" + destinationid);
+        }
+
+        function moveListItemsStudent(sourceid, destinationid, text) {
+            var sourceItem = $("#" + sourceid).val();
+
+            if (sourceItem == null) {
+                alert("Please select a student to move.");
+                return;
+            }
+
+            if (text == "ADD") {
+                AddStudents(sourceItem);
+                if (addedStudents.length > '@studentAddCheck') {
+                    RemoveStudents(sourceItem);
+                    ShowModalBox(text, '@studentAddCheck');
+                    return;
+                }
+            } else {
+                RemoveStudents(sourceItem);
+                if (removedStudents.length > '@studentRemoveCheck') {
+                    AddStudents(sourceItem);
+                    ShowModalBox(text, '@studentRemoveCheck');
+                    return;
+                }
+            }
+
+            $("#" + sourceid + "  option:selected").remove().appendTo("#" + destinationid);
+        }
+
+        function AddStudents(selectedStudent) {
+            jQuery.grep(selectedStudent, function (el) {
+                if (jQuery.inArray(el, existingSudents) != -1) removedStudents.pop(el);
+                if (jQuery.inArray(el, existingSudents) == -1) addedStudents.push(el);
+            });
+        }
+
+        function RemoveStudents(selectedStudent) {
+            jQuery.grep(selectedStudent, function (el) {
+                if (jQuery.inArray(el, existingSudents) != -1) removedStudents.push(el);
+                if (jQuery.inArray(el, existingSudents) == -1) addedStudents.pop(el);
+            });
+        }
+
+        function ShowModalBox(text, count) {
+            $("#modalMessageHeader").html("Warning");
+            $("#modalMessageTitle").html("");
+            showModalPopup('modalMessage', modalAlertTimeOut);
+            if (text == "ADD") {
+                $("#modalMessageBody").html("A maximum of  " + count + "  students can be added at one time. Please add  " + count + "  or fewer students, click save and repeat.");
+            } else {
+                $("#modalMessageBody").html("A maximum of " + count + " students can be removed at one time. Please remove " + count + " or fewer students, click save and repeat.");
+            }
+        }
+
+        function saveTeacherToClass(showDialogBox) {
+            var cid = $("#ClassId").val();
+            var teacherIds = [];
+            $('#TeachersForThisClass option').each(function () {
+                teacherIds.push(this.value);
+            });
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/Classes/UpdateTeachersInClass",
+                data: JSON.stringify({ classId: cid, teacherId: teacherIds }),
+                contentType: "application/json; charset=utf-8"
+            })
+            .then(
+            function (response) {
+                if (response == "Success") {
+                    if (showDialogBox == "True") {
+                        showModalPopup('modalMessage', modalMessageTimeOut);
+                        $("#modalMessageHeader").html("Success");
+                        $("#modalMessageTitle").html("<h3>Teacher Successfully Saved</h3>");
+                        $("#modalMessageBody").html("Teachers were successfully added to the class.");
+                    } else {
+                        var tabItem = $('.nav-tabs a[href=#studentTab]');
+                        tabItem.tab('show');
+                    }
+                }
+                else {
+                    $('#modalError').modal('show');
+                    $("#modalErrorTitle").html("<h3><span style='color:red'>Error Saving Teachers</span></h3>");
+                    $("#modalErrorBody").html(response);
+                }
+            },
+            function (xhr, status) {
+                $('#modalError').modal('show');
+                $("#modalErrorTitle").html("<h3><span style='color:red'>Error Saving Teachers</span></h3>");
+                $("#modalErrorBody").html(xhr.statusText + " " + xhr.status);
+            });
+        }
+
+
+        function showDeleteConfirmationModal(modalId) {
+            $("#" + modalId).modal('show');
+            $("#" + modalId + "Header").html("Warning");
+            $("#" + modalId + "Title").html("<h3>Delete Class</h3>");
+            $("#" + modalId + "Body").html("You are about to delete a class.");
+        }
+
+
+        function DeleteClass() {
+            var cid = $("#ClassId").val();
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/Classes/DeleteClass",
+                data: { ClassId: cid },
+            })
+            .then(
+            function (response) {
+                if (response == "Success") {
+                    window.location.href = "/Classes/Index";
+                }
+                else {
+                    $('#modalError').modal('show');
+                    $("#modalErrorTitle").html("<h3><span style='color:red'>Error Deleting Class</span></h3>");
+                    $("#modalErrorBody").html(response);
+                }
+            },
+            function (xhr, status) {
+                $('#modalError').modal('show');
+                $("#modalErrorTitle").html("<h3><span style='color:red'>Error Deleting Class</span></h3>");
+                $("#modalErrorBody").html(xhr.statusText + " " + xhr.status);
+            });
+            $(document).ajaxComplete(function () {
+                $("#modelDelete").hide();
+            });
+        }
+
+
+        function UpdateSchoolByYear(schoolYearId) {
+            $.ajax({
+                url: "/JsonService/RefreshSchoolByYear?schoolYearId=" + schoolYearId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#SchoolId').empty();
+                $.each(response, function (key, ddlData) {
+                    $('select#SchoolId').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+    </script>
+}

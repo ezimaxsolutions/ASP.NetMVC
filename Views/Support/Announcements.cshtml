@@ -1,0 +1,41 @@
+﻿@using PagedList
+@using PagedList.Mvc
+@model IPagedList<EDS.Models.Announcement>
+
+@{
+    ViewBag.Title = "Announcements";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Announcements</h2>
+        </div>
+    </div>
+</div>
+
+
+<table>
+    @foreach (var announcement in Model)
+    {
+        <tr>
+            <td>
+                <h4 class="announcementTitleClr"> @(announcement.CreatedDateTime.ToString("MM/dd/yy") + " - " + @announcement.Title) </h4>
+            </td>
+        </tr>
+        <tr>
+            <td class="announcementText">
+                @Html.Raw(announcement.Text)
+            </td>
+
+        </tr>
+    }
+</table>
+
+@if (Model.PageCount > 1)
+{
+    <div class="pagedList">
+        @Html.PagedListPager(Model, page => Url.Action("Announcements", new { page }))
+    </div>
+}

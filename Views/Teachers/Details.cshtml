@@ -1,0 +1,51 @@
+﻿@model EDS.tblClassTeacher
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>tblClassTeacher</h4>
+	<hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.CreateDatetime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CreateDatetime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ChangeDatetime)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ChangeDatetime)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tblClass.ClassDesc)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblClass.ClassDesc)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.tblUser.UserEmail)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.tblUser.UserEmail)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.ClassTeacherId }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

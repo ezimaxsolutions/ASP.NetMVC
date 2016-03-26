@@ -1,0 +1,86 @@
+﻿@model IEnumerable<EDS.tblImport>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+}
+<h2 style="float:right">Import Files</h2>
+<div class="form-horizontal" style="float:left;width:100%;margin-top:15px">
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+    <hr />
+    @{
+        WebGrid grid = new WebGrid(Model, canPage: true, rowsPerPage: 8);
+    }
+    @grid.GetHtml(
+                tableStyle: "gridTable",
+            headerStyle: "gridHead",
+            footerStyle: "gridFooter",
+            rowStyle: "gridRow",
+            alternatingRowStyle: "gridAltRow",
+            columns: new[] {
+    grid.Column("ImportFile","File Name"),
+    grid.Column("tblImportType.ImportTypeDesc","File Type"),
+    grid.Column(("ReadyToProcess"), "Ready To Process"),
+    grid.Column("CreateDatetime", "Created Date"),
+    grid.Column("","Actions",format: @<text>
+        @Html.ActionLink("Edit", "Edit", new { id = item.ImportId }) |
+        @Html.ActionLink("Details", "Details", new { id = item.ImportId }) |
+        @Html.ActionLink("Delete", "Delete", new { id = item.ImportId })
+    </text>)
+})
+    @*<table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ImportFile)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ReadyToProcess)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProcesseDateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreateDatetime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.tblImportType.ImportTypeDesc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.tblUser.UserEmail)
+            </th>
+            <th></th>
+        </tr>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ImportFile)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ReadyToProcess)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProcesseDateTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreateDatetime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.tblImportType.ImportTypeDesc)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.tblUser.UserEmail)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.ImportId }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.ImportId }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.ImportId })
+                </td>
+            </tr>
+        }
+
+    </table>*@
+    <hr />
+</div>

@@ -1,0 +1,123 @@
+﻿@using EDS.Helpers
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Teacher Impact Reports</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Teacher Impact Report", "Index", "Home", null, new { @class = "navbar-brand" })
+                <br />
+            </div>
+            <div style="height:50px"></div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li class="dropdown" id="menu1">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu1">
+                            District<b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Schools", "Index", "Schools")</li>
+                            <li>@Html.ActionLink("Teachers", "Index", "SchoolTeacher")</li>
+                            <li>@Html.ActionLink("Students", "Index", "Students")</li>
+                            <li>@Html.ActionLink("Classes", "Index", "Classes")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="menu2">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu2">
+                            Assessments<b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a>Inventory</a></li>
+                            <li><a>Weighting</a></li>
+                            <li><a>Create New</a></li>
+                            <li>@Html.ActionLink("Import Scores", "Index", "Imports")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="menu3">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu3">Reports<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a>Student History</a></li>
+                            <li><a>Teacher Impact Report</a></li>
+                            <li class="dropdown" id="menu4">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#menu4">Compsosite Reports<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a>Grade Level Growth</a></li>
+                                    <li><a>School Growth</a></li>
+                                    <li><a>District Growth</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="menu5">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu5">Support<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a>Announcements</a></li>
+                            <li><a>Technical Support</a></li>
+                            <li><a>Request A Feature</a></li>
+                            <li><a>Training</a></li>
+                        </ul>
+                    </li>
+                    <li><a>Search</a></li>
+                    <li class="dropdown" id="menu6">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#menu6">My Account<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Update Password", "Manage", "Account")</li>
+                        </ul>
+                    </li>
+                    <li>@Html.Partial("_LoginPartial")</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div style="float:left;margin-left:35px;margin-top:75px;margin-bottom:10px">
+        <table>
+            <tr>
+                <td><label class="control-label ">District: @*@Session["DistrictName"]*@</label></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><label class="control-label ">School: @*@Session["SchoolName"]*@</label></td>
+                <td><label>School Year 2013/14</label></td>
+            </tr>
+            <tr>
+                <td><label> Report Date: @DateTime.Now.ToLongDateString()</label></td>
+@if (User.IsInRole("Administrator"))
+                    {
+                <td style="padding-left:10px"><label class="control-label ">Adminstrator: @*@Session["UserName"]*@</label></td>
+}
+else
+{    
+    <td><label class="control-label" style="padding-left:10px">Teacher: @*@Session["UserName"]*@</label></td>
+}
+            </tr>
+
+        </table>
+    </div>
+    <hr />
+    <div class="container body-content">
+        @RenderBody()
+        
+    </div>
+    <footer>
+        <p>&copy; @DateTime.Now.Year -Education Data Solutions</p>
+    </footer>
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/bootstrap")
+@RenderSection("scripts", required: false)
+</body>
+</html>

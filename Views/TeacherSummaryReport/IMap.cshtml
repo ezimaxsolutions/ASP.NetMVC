@@ -1,0 +1,49 @@
+﻿
+@{
+    ViewBag.Title = "IMap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>IMap</h2>
+
+<hr />
+
+<p>
+    <label class="control-label ">District: Northshore District 112</label>
+    <br />
+    <label>School Year: 2013/14</label>
+    <br />
+    <label class="control-label ">School: Braeside School</label>
+    <br />
+    <label> Report Date: 1/23/14</label>
+    <br />
+    <label class="control-label ">Teacher: Ladybird Johnson</label>
+</p>
+
+@model IEnumerable<imap>
+@{
+    ViewBag.Title = "People";
+    WebGrid grid = new WebGrid(Model);
+}
+
+@grid.GetHtml(tableStyle: "gridTable",
+            headerStyle: "gridHead",
+            footerStyle: "gridFooter",
+            rowStyle: "gridRow",
+            alternatingRowStyle: "gridAltRow", columns: new[] {
+    grid.Column("row1","Student ID"),
+    grid.Column("row2","Student",style:"AdminGrid"),
+    grid.Column("row3","Raw Score"),
+    grid.Column("row4","Projection"),
+    grid.Column("row5","+/-"),
+    grid.Column("row6","Percentile"),
+    grid.Column("row7","Raw Score"),
+    grid.Column("row8","Projection"),
+    grid.Column("row9","+/-"),
+    grid.Column("row10","Percentile"),
+    grid.Column("row11","Raw Score"),
+    grid.Column("row12","Projection"),
+    grid.Column("row13","+/-"),
+    grid.Column("row14","Percentile")
+})
+

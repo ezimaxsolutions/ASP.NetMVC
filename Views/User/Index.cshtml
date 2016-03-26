@@ -1,0 +1,233 @@
+﻿@using EDS.Helpers
+@*@model IEnumerable<EDS.tblUser>*@
+@model List<EDS.tblUserExt>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Teachers / Administrators</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <button id="btnAdd" class="btn btn-primary">
+            <span class="glyphicon glyphicon-plus-sign"></span>&nbsp;Add Teacher / Administrator
+        </button>
+    </div>
+</div>
+
+<hr />
+
+<!--FILTER-->
+<table class="table-condensed">
+    <tr>
+        <td><b>Year</b></td>
+        <td>
+            @Html.DropDownList("SchoolYearList", null, new { @class = "form-control" })
+        </td>
+    </tr>
+    <tr>
+        <td><b>District</b></td>
+        <td>
+            @ViewBag.DistrictDesc
+        </td>
+    </tr>
+    <tr>
+        <td><b>School</b></td>
+        <td>
+            @Html.DropDownList("SchoolId", null, new { @class = "form-control" })
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+</table>
+
+<!--REFRESH GRID-->
+@using (Html.BeginForm("UpdateGrid", "User", FormMethod.Get, new { id = "formUpdateGrid" }))
+{
+    <button id="btnUpdateGrid" class="btn btn-primary">
+        <span class="glyphicon glyphicon-refresh"></span>&nbsp;Update
+    </button>
+
+    <input type="hidden" id="hiddenDistrictFilter" name="hiddenDistrictFilter" />
+    <input type="hidden" id="hiddenSchoolFilter" name="hiddenSchoolFilter" />
+    <input type="hidden" id="schoolYearFilter" name="schoolYearFilter" />
+}
+
+<hr />
+
+<!--SEARCH-->
+@using (Html.BeginForm("Search", "User", FormMethod.Get, new { id = "formSearch" }))
+{
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="input-group">
+                @Html.TextBox("Search", null, new { @class = "form-control" })
+                <span class="input-group-btn">
+                    <button id="btnSearch" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-search"></span>&nbsp;Search Teachers / Administrators
+                    </button>
+                </span>
+            </div><!-- /input-group -->
+        </div><!-- /.col-lg-4 -->
+    </div><!-- /.row -->
+    <br />
+    <div class="row">
+        <div class="col-lg-4">
+            <b>Teachers / Administrators Found: @Model.Count()</b>
+        </div>
+    </div>
+    
+    <input type="hidden" id="hiddenDistrictFilterSearch" name="hiddenDistrictFilterSearch" />
+    <input type="hidden" id="schoolFilterSearch" name="schoolFilterSearch" />
+    <input type="hidden" id="schoolYearSearch" name="schoolYearSearch" />
+}
+
+<br />
+
+<!--GRID-->
+@{
+    WebGrid grid = new WebGrid(source: Model, defaultSort: "LastName", canPage: true, rowsPerPage: 20);
+}
+
+@grid.GetHtml(
+        tableStyle: "table", //"gridTable",
+        headerStyle: "gridHead",
+        footerStyle: "gridFooter",
+        rowStyle: "gridRow",
+        alternatingRowStyle: "gridAltRow",
+                        columns: new[] {
+                            grid.Column("FirstName","First Name" + Html.SortDirection(ref grid, "FirstName")),
+                            grid.Column("LastName", "Last Name" + Html.SortDirection(ref grid, "LastName")),
+                            grid.Column("UserEmail", "Email" + Html.SortDirection(ref grid, "UserEmail")),
+                            grid.Column("StateId", "State Id" + Html.SortDirection(ref grid, "StateId")),
+                            grid.Column("RoleDesc", "Role" + Html.SortDirection(ref grid, "RoleDesc")),
+
+                            grid.Column("", "",
+                            format: 
+                            @<text>
+                                @Html.ActionLink("Details", "Edit", new { id = item.UserId, schoolYearId = item.SchoolYearId })
+                                <span style="color:#c9c9c9">&nbsp;&nbsp;|&nbsp;&nbsp;</span> 
+                                @Html.Raw(String.Format("<a href='/TeacherSummaryReport/SummaryReportById?TeacherId={0}'>Report</a>", @item.UserId))
+                            </text>)
+                        })
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+
+    <script type="text/javascript">
+        $(function () {
+            // Disable/Enable controls based on role
+            if ("@ViewBag.AllowEdit" == "False") {
+                $("#btnAdd").hide();
+            }
+
+            $('#btnSearch').click(function (e) {
+                e.preventDefault();
+                $('#hiddenDistrictFilterSearch').val($('#DistrictId').val());
+                $('#schoolFilterSearch').val($('#SchoolId').val());
+                $('#schoolYearSearch').val($('#SchoolYearList').val());
+                $('#formSearch').submit();
+            });
+
+            $('#btnUpdateGrid').click(function (e) {
+                e.preventDefault();
+                updateGrid();
+            });
+
+            $('#btnAdd').click(function () {
+                window.location.href = "/User/Create";
+            });
+
+            $('#SchoolYearList').change(function () {
+                if ('@(((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)' == 'False') {
+                    UpdateSchoolByYear($('#SchoolYearList').val());
+                }
+            });
+        });
+
+        function updateSchoolByDistrict(districtId) {
+            $.ajax({
+                url: "/JsonService/GetSchoolByYear/" + districtId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#SchoolId').empty();
+                $('select#SchoolId').append('<option value="-1">--All--</option>');
+                $.each(response, function (key, ddlData) {
+                    $('select#SchoolId').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function displayDetails(displayId) {
+            $.ajax({
+                url: "/Students/Details/" + displayId,
+                type: "GET",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $("#spanStudentNameTitle").html(response.firstName + " " + response.lastName);
+                $("#spanStudentName").html(response.firstName + " " + response.lastName);
+                $("#spanGradeLevel").html(response.gradeLevel);
+                $("#spanStateId").html(response.stateId);
+                $("#spanLocalId").html(response.localId);
+                $("#spanHomeSchool").html(response.homeSchool);
+
+                $('#myModal').modal('show')
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function updateGrid() {
+            $('#hiddenDistrictFilter').val($('#DistrictId').val());
+            $('#hiddenSchoolFilter').val($('#SchoolId').val());
+            $('#schoolYearFilter').val($('#SchoolYearList').val());
+            $('#formUpdateGrid').submit();
+        }
+
+        function redirectToReport(studentId) {
+            window.location.href = "/StudentHistory/Index?StudentId=" + studentId;
+        }
+
+        function UpdateSchoolByYear(schoolYear) {
+            $.ajax({
+                url: "/JsonService/GetSchoolByYear?schoolYear=" + schoolYear,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#SchoolId').empty();
+                $.each(response, function (key, ddlData) {
+                    $('select#SchoolId').append(
+                            '<option value="' + ddlData.Value + '">'
+                            + ddlData.Text +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+    </script>
+}

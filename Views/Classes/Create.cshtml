@@ -1,0 +1,177 @@
+﻿@model EDS.tblClass
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <button id="btnBack" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+                        </button>
+                    </td>
+                    <td>
+                        <h2>Add Class</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs">
+    <li class="active"><a href="#classTab" data-toggle="tab">Class Details</a></li>
+    <li><span class="disabled-tab">Teachers</span></li>
+    <li><span class="disabled-tab">Students</span></li>
+</ul>
+<!-- Tab panes -->
+<div class="tab-content">
+    <div class="tab-pane active" id="classTab">
+        <h3>Class Details</h3>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="form-horizontal" style="float:left;width:100%">
+                @Html.ValidationSummary(true)
+
+                <div class="form-group">
+                    <span class="control-label col-md-1"><b>District</b></span>
+                    <div class="col-md-11">
+                        @ViewBag.DistrictDesc
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SchoolId, "School", new { @class = "control-label col-md-1" })
+                    <div class="col-md-11">
+                        @Html.DropDownList("SchoolId", null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SchoolId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ClassDesc, "Class", new { @class = "control-label col-md-1" })
+                    <div class="col-md-11">
+                        @Html.EditorFor(model => model.ClassDesc)
+                        @Html.ValidationMessageFor(model => model.ClassDesc)
+                        <span class="requiredMessage" id="requiredClass"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-md-1">Year</label>
+                    <div class="col-md-11">
+                        @Html.DropDownList("SchoolYearId", null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SchoolYearId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubjectId, "Subject", new { @class = "control-label col-md-1" })
+                    <div class="col-md-11">
+                        @Html.DropDownList("SubjectId", null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.SubjectId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Grade, "Grade", new { @class = "control-label col-md-1" })
+                    <div class="col-md-11">
+                        @Html.EditorFor(model => model.Grade)
+                        @Html.ValidationMessageFor(model => model.Grade)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-11">
+                        <button id="btnSave" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-save"></span>&nbsp;Save and Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+        $(function () {
+            $("input").addClass("form-control");
+
+            $("#btnSave").click(function () {
+                if ($("#ClassDesc").val() == "") {
+                    $("#requiredClass").html("Required");
+                    return false;
+                } else {
+                    $("#requiredClass").html("");
+                    return true;
+                }
+            });
+
+            $("#btnBack").click(function () {
+                window.location.href = "/Classes/Index";
+            });
+
+            $('#DistrictId').change(function () {
+                //alert($('#DistrictId').val());
+                updateSchoolByDistrict($('#DistrictId').val())
+            });
+
+            $('#SchoolYearId').change(function () {
+                UpdateSchoolByYear($('#SchoolYearId').val());
+            });
+        });
+
+        function updateSchoolByDistrict(districtId) {
+            $.ajax({
+                url: "/Classes/RefreshSchoolByDistrict/" + districtId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#SchoolId').empty();
+                //$('select#SchoolId').append('<option value="-1">--All--</option>');
+                $.each(response, function (key, ddlData) {
+                    $('select#SchoolId').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function UpdateSchoolByYear(schoolYearId) {
+            $.ajax({
+                url: "/JsonService/RefreshSchoolByYear?schoolYearId=" + schoolYearId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#SchoolId').empty();
+                $.each(response, function (key, ddlData) {
+                    $('select#SchoolId').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+    </script>
+}

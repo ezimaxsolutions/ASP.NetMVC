@@ -1,0 +1,31 @@
+﻿@model EDS.Models.LoginViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Welcome</h2>
+            <p>
+                Welcome to Teacher Impact Reports.  This product is under continual improvement, with an updated version being deployed monthly. 
+                Every school district is unique, and has varying needs from this system. 
+                We highly encouage and appreciate your feedback, that will allow us to engineer Teacher Impact Reports to suit your particular needs.  
+                Any and all comments are appreciated; please click <a href="/Support/FeatureRequest">here</a> for more information on submitting your suggestions.
+            </p>
+        </div>
+        <div class="col-md-4">
+            <h2>Getting Started</h2>
+            <p>For a brief overview on how to use the Teacher Impact Reports system and its features, please click <a href="/Support/Training">here</a>.</p>
+            <h2>Support</h2>
+            <p>If you encounter any errors or issues during your Teacher Impact Reports testing, please email the details to <a href="mailto:support@teacherimpactreports.com">support@teacherimpactreports.com</a>.
+The more detail you can provide, the more quickly we will be able to investgate the issue.  For further information on technical support and error reporting, please click
+                <a href="/Support/TechnicalSupport">here</a>.</p>
+        </div>
+        <div class="col-md-4">
+            <h2>Announcements</h2>
+            @Html.Action("GetAnnouncements", "Home")         
+        </div>
+    </div>
+    <div class="row"><hr/></div>
+</div>

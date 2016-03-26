@@ -1,0 +1,78 @@
+﻿@model EDS.tblSchoolUserRole
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutSchool.cshtml";
+    }
+
+<h2 style="float:right">Teacher - Edit</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal" style="float:left;width:100%">
+        
+        <br />
+        <p>
+            @Html.ActionLink("Back to List", "Index")
+        </p>
+        <hr style="height: 2px;background-color:navy" />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.SchoolRoleId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.SchoolId, "School", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("SchoolId", String.Empty)
+                @Html.ValidationMessageFor(model => model.SchoolId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserId, "User", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("UserId", String.Empty)
+                @Html.ValidationMessageFor(model => model.UserId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.RoleId, "Role", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("RoleId", String.Empty)
+                @Html.ValidationMessageFor(model => model.RoleId)
+            </div>
+        </div>
+
+        @*<div class="form-group">
+            @Html.LabelFor(model => model.CreateDatetime, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CreateDatetime)
+                @Html.ValidationMessageFor(model => model.CreateDatetime)
+            </div>
+        </div>*@
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ChangeDatetime,"Date Changed", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ChangeDatetime)
+                @Html.ValidationMessageFor(model => model.ChangeDatetime)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+        <hr style="height: 3px;background-color:navy"/>
+    </div>
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

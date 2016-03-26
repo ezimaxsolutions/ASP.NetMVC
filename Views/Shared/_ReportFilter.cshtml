@@ -1,0 +1,24 @@
+﻿@model EDS.Models.ReportFilterViewModel
+
+<div>
+    <div class="col-lg-3"><b>District:</b> @Model.DistrictName</div>
+    <div class="col-lg-3"><b>Teacher:</b> @Model.TeacherName</div>
+    <div class="col-lg-4"><b>Class:</b> @Model.ClassName</div>
+    <div class="col-lg-2"><b>Report Date:</b> @DateTime.Today.ToShortDateString()</div>
+    @if (Model.IsAdmin)
+    {
+        if (Model.DisplayAdminFilters)
+        {
+
+            <div class="col-lg-3 report-filter"><b>Hispanic:</b> @Model.HispanicDisplay</div>
+            <div class="col-lg-3 report-filter"><b>Race:</b> @Model.Race</div>
+            <div class="col-lg-4 report-filter"><b>Gender: </b> @Model.Gender</div>
+            <div class="col-lg-2 report-filter"><b>Special Education:</b> @Model.IepIndicatorDisplay</div>
+
+            <div class="col-lg-3 report-filter"><b>Limited English:</b> @Model.LepIndicatorDisplay</div>
+            <div class="col-lg-3 report-filter"><b>Low Income:</b> @Model.FrIndicatorDisplay</div>
+        }
+        <div class="col-lg-3"><b>School Year:</b> @Model.SchoolYear</div>
+    }
+
+</div>

@@ -1,0 +1,225 @@
+﻿@model EDS.tblUserExt
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <button id="btnBack" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+                        </button>
+                    </td>
+                    <td>
+                        <h2>Edit Teacher / Administrator</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+@using (Html.BeginForm("Edit", "User", FormMethod.Post, new { id = "formUser" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal col-lg-12">
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.UserId)
+        @Html.HiddenFor(model => model.SchoolYearId)
+
+        <table class="table-condensed">
+            <tr>
+                <td valign="top">
+                    <h4>Teacher / Administrator Details</h4>
+                    <table class="table-condensed">
+                        <tr>
+                            <td nowrap>
+                                <b>District</b>
+                            </td>
+                            <td>
+                                @ViewBag.DistrictDesc
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>User Name</b>
+                                @Html.HiddenFor(model => model.UserName)
+                            </td>
+                            <td>
+                                @Model.UserName
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>Email</b>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.UserEmail)
+                                @Html.ValidationMessageFor(model => model.UserEmail)
+                                <span class="requiredMessage" id="requiredUserEmail"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>First Name</b>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.FirstName)
+                                @Html.ValidationMessageFor(model => model.FirstName)
+                                <span class="requiredMessage" id="requiredFirstName"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>Last Name</b>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.LastName)
+                                @Html.ValidationMessageFor(model => model.LastName)
+                                <span class="requiredMessage" id="requiredLastName"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>State Id</b>
+                            </td>
+                            <td>
+                                @Html.EditorFor(model => model.StateId)
+                                @Html.ValidationMessageFor(model => model.StateId)
+                                <span class="requiredMessage" id="requiredStateId"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>Role Id</b>
+                            </td>
+                            <td>
+                                @Html.DropDownList("RoleId", null, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.RoleId)
+                            </td>
+                        </tr>
+
+                        <tr><td colspan="2"><hr /></td></tr>
+                        <tr>
+                            <td colspan="2">
+                                <button id="btnSaveUser" class="btn btn-primary">
+                                    <span class="glyphicon glyphicon-save"></span>&nbsp;Save Teacher / Administrator
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <p id="paraEditCurrentYear" style="display:none;">You can only edit Teacher / Administrator data for the current school year. To view / edit data for the current year, please click <a href="@Url.Action("Edit", "User", new { id = Model.UserId, schoolYearId = ViewBag.CurrentSchoolYearId })">here</a></p>
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+                <td style="border-left:solid 1px #d9d9d9">&nbsp;</td>
+                <td valign="top" class="col-lg-8">
+
+                    <h4>Schools</h4>
+
+                    <table>
+                        <tr>
+                            <td>
+                                <table>
+                                    @for (int i = 0; i <= ((Model.Schools.Count() - 1) / 2); i++)
+                                    {
+                                        var className = Model.Schools[i].IsLocked ? "DCB" : "SCB";
+                                        <tr>
+                                            <td width="300px">
+                                                @Html.CheckBoxFor(m => m.Schools[i].Checked, new { @id = "userSchoolId_" + i, @class = className })
+                                                @Html.DisplayFor(m => m.Schools[i].Text)
+                                                @Html.HiddenFor(m => m.Schools[i].Id, new { @id = "hiddenUserSchoolId_" + (i) })
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+
+                            </td>
+                            <td>
+                                <table>
+                                    @for (int i = ((Model.Schools.Count()) / 2); i <= Model.Schools.Count() - 1; i++)
+                                    {
+                                        var className = Model.Schools[i].IsLocked ? "DCB" : "SCB";
+                                        <tr>
+                                            <td width="300px">
+                                                @Html.CheckBoxFor(m => m.Schools[i].Checked, new { @id = "userSchoolId_" + i, @class = className })
+                                                @Html.DisplayFor(m => m.Schools[i].Text)
+                                                @Html.HiddenFor(m => m.Schools[i].Id, new { @id = "hiddenUserSchoolId_" + (i) })
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="requiredMessage" id="requiredCheckbox"></span></td>
+                        </tr>
+                        <tr><td colspan="2"><hr /></td></tr>
+                        @{
+
+                            <tr>
+                                <td colspan="2"> <h4>Classes</h4></td>
+                            </tr>
+                            <tr><td colspan="2">@Html.DropDownList("SchoolYear", null, new { @class = "form-control", @id = "ddlYear" })</td></tr>
+                            <tr><td colspan="2"><br /></td></tr>
+                            <tr>
+                                <td colspan="2">
+                                    <table id="tblClassGrid" class="table">
+                                        <thead><tr class='gridHead'><th>Class Name</th></tr></thead>
+                                        <tbody>
+                                            @if (Model.SchoolClasses.Count > 0)
+                                            {
+                                                foreach (var m in Model.SchoolClasses)
+                                                {
+                                                    <tr><td><a href='/Classes/Edit/@m.SchoolClassId'>  @m.ClassDesc </a></td></tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr><td>No Classes</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+    <input type="hidden" id="SelectedSchools" name="SelectedSchools" />
+    <input type="hidden" id="Password" name="Password" value="DUMMY_VALUE" />
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/app/editUser.js"></script>
+
+
+    <script type="text/javascript">
+        $(function () {
+            editUser.showHideUIControls('@Model.SchoolYearId', '@ViewBag.CurrentSchoolYearId', '@ViewBag.AllowEdit')
+            editUser.clickSaveUser()
+            editUser.backButtonClick();
+            editUser.getClassDataOnYearChange();
+            editUser.checkboxValidation('@ViewBag.SchoolMessage');
+        });
+    </script>
+}

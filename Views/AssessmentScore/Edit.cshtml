@@ -1,0 +1,144 @@
+﻿@model EDS.Models.StudentScore
+
+@{
+    ViewBag.Title = "Edit Assessment Score";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <button id="btnBack" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+                        </button>
+                    </td>
+                    <td>
+                        <h2>Edit Assessment Score</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+
+
+    @Html.ValidationSummary(true)
+
+    @*<table class="table-condensed">
+        <tr>
+
+            <td valign="top">*@
+
+    <table class="table-condensed">
+        <tbody>
+            <tr>
+                <td nowrap="">
+                    <b>First Name</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.FirstName, new {@class = "form-control", disabled = "disabled", @readonly = "readonly"})
+                </td>
+            </tr>
+            <tr>
+                <td nowrap="">
+                    <b>Last Name</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.LastName, new {@class = "form-control", disabled = "disabled", @readonly = "readonly"})
+                </td>
+            </tr>
+
+            <tr>
+                <td nowrap="">
+                    <b>School Year</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.SchoolYear, new {@class = "form-control", disabled = "disabled", @readonly = "readonly"})
+                </td>
+            </tr>
+
+
+            <tr>
+                <td nowrap="">
+                    <b>School Term</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.SchoolTerm, new {@class = "form-control", disabled = "disabled", @readonly = "readonly"})
+                </td>
+            </tr>
+
+            <tr>
+                <td nowrap="">
+                    <b>Assessment Type</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.AssessmentType, new {@class = "form-control", disabled = "disabled", @readonly = "readonly"})
+                </td>
+            </tr>
+
+            <tr>
+                <td nowrap="">
+                    <b>Assessment Desc</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.AssessmentDesc, new {@class = "form-control", disabled = "disabled", @readonly = "readonly"})
+                </td>
+            </tr>
+
+            <tr>
+                <td nowrap="">
+                    <b>Score</b>
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Score, new {@class = "form-control"})
+                    @Html.ValidationMessageFor(model => model.Score)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <hr />
+                    <button class="btn btn-primary" id="btnSaveStudent">
+                        Save Assessment Score
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    @*</td>
+            </tr>
+        </table>*@
+
+
+
+
+    @Html.HiddenFor(model => model.AssessmentId)
+    @Html.HiddenFor(model => model.Subject)
+    @Html.HiddenFor(model => model.LocalId)
+    @Html.HiddenFor(model => model.StudentId)
+}
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+
+
+        <script type="text/javascript">
+            $(function () {
+                $("#btnBack").click(function () {
+                    history.go(-1);
+                });
+            });
+        </script>
+    }

@@ -1,0 +1,757 @@
+﻿@model EDS.Models.TIRSummaryModel
+@{
+    ViewBag.Title = "Summary Report";
+    Layout = "~/Views/Shared/_LayoutReports.cshtml";
+}
+
+@{
+
+    var toggleText = ViewBag.ViewMeetExceedSummary == true ? "Std. Report" : "M/E Report";
+    ViewBag.ViewMeetExceedSummary = !ViewBag.ViewMeetExceedSummary;
+    bool Disabled = @Model.SummaryList.Count > 0 ? false : true;
+    string WeightedImpactpaddingright = "26px";
+    string meetExceedArrowAlignmentCss = "meet-exceed-arrow-float-left-" + ViewBag.ViewMeetExceedSummary;
+    string meetExceedColumnAlignmentCss = "meet-exceed-div-float-" + ViewBag.ViewMeetExceedSummary;
+}
+
+@functions
+{
+    int summaryDecimalPlace = int.Parse(System.Configuration.ConfigurationManager.AppSettings["SummaryViewDecimalPlace"]);
+    int maxStudent = 0;
+    decimal sumOfMaxStudent = 0;
+    decimal totMaxStudent = 0;
+    decimal sumOfMaxStudentMultiplyGradeImpact = 0;
+    decimal sumOfMaxStudentMultiplySubjectImpact = 0;
+    //int counter = 0;
+    decimal? GradeImpact = 0;
+    decimal totalSubjectImpact = 0;
+    int? displayArrow = null;
+
+    string GetRowBackgroundColor(bool isEven)
+    {
+        if (!isEven)
+        {
+            return "#FFFFFF";
+        }
+        else
+        {
+            return "#F9F9F9";
+        }
+    }
+
+    void GradeImpactCalculation()
+    {
+        sumOfMaxStudentMultiplyGradeImpact = sumOfMaxStudentMultiplyGradeImpact + decimal.Round((maxStudent * (decimal)GradeImpact), summaryDecimalPlace, MidpointRounding.AwayFromZero);
+        //sumOfMaxStudent is used for grade wise
+        sumOfMaxStudent = sumOfMaxStudent + maxStudent;
+        AddupTotalMaxStudent();
+    }
+    void AddupTotalMaxStudent()
+    {
+        //totMaxStudent is used for whole report
+        totMaxStudent = totMaxStudent + maxStudent;
+    }
+
+    void SubjectImpactCalculation()
+    {
+        totalSubjectImpact = (sumOfMaxStudent == 0) ? 0 : decimal.Round((decimal)sumOfMaxStudentMultiplyGradeImpact / sumOfMaxStudent, summaryDecimalPlace, MidpointRounding.AwayFromZero);
+        sumOfMaxStudentMultiplySubjectImpact += sumOfMaxStudentMultiplyGradeImpact;
+    }
+
+
+}
+
+<div style="background:#EEEEEE;width:100%;border-image:url('/content/light_gray_dropshadow.png') repeat;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12" style="padding-left:20px;">
+                <h1>Teacher Impact Reports</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3" style="padding-left:20px;">
+                <b>School Year</b><br />
+                @Html.DropDownListFor(m => m.DropDown.Year.SelectedYear, Model.DropDown.Year.YearItems, new { @class = "form-control", @id = "ddlYear" })
+                @Html.ValidationMessageFor(m => m.DropDown.Year.SelectedYear)
+            </div>
+            <div class="col-lg-3">
+                <b>School</b><br />
+                @Html.DropDownListFor(m => m.DropDown.School.SelectedSchool, Model.DropDown.School.SchoolItems, new { @class = "form-control", @id = "ddlSchool" })
+                @Html.ValidationMessageFor(m => m.DropDown.School.SelectedSchool)
+            </div>
+            <div class="col-lg-3" style="padding-right:20px;">
+                <b>Teacher</b><br />
+                @Html.DropDownListFor(m => m.DropDown.Teacher.SelectedTeacher, Model.DropDown.Teacher.TeacherItems, new { @class = "form-control", @id = "ddlTeacher" })
+                @Html.ValidationMessageFor(m => m.DropDown.Teacher.SelectedTeacher)
+            </div>
+            <div class="col-lg-3" style="padding-right: 20px;">
+                <b>Class</b>
+                @Html.DropDownListFor(m => m.DropDown.SchoolClass.SelectedClass, Model.DropDown.SchoolClass.ClassItems, new { @class = "form-control", @id = "ddlClass" })
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-2" style="padding-left: 20px;">&nbsp;</div>
+        </div>
+        <div class="row">
+            <div class="col-lg-2" style="padding-bottom: 15px; padding-left: 20px;">
+                <a href="#" style="display:none;" id="lnkReportFilters">Report Filters:</a>
+            </div>
+        </div>
+        <div id="divReportFilters" style="display:none;">
+            <div class="row">
+                <div class="col-lg-3"
+                     style="padding-bottom: 20px; padding-left: 20px;">
+                    <b>Hispanic</b><br>
+
+                    @Html.RadioButtonFor(model => model.Hispanic, -1, new { @checked = true, @name = "Hispanic" }) All
+                    @Html.RadioButtonFor(model => model.Hispanic, true, new { @name = "Hispanic" }) Yes
+                    @Html.RadioButtonFor(model => model.Hispanic, false, new { @name = "Hispanic" }) No
+                </div>
+                <div class="col-lg-2" style="padding-left: 20px;">
+                    <b>
+                        Special Education
+                    </b><br>
+
+                    @Html.RadioButtonFor(model => model.IepIndicator, -1, new { @checked = true, @name = "IepIndicator" }) All
+                    @Html.RadioButtonFor(model => model.IepIndicator, true, new { @name = "IepIndicator" }) Yes
+                    @Html.RadioButtonFor(model => model.IepIndicator, false, new { @name = "IepIndicator" }) No
+
+                </div>
+                <div class="col-lg-2" style="padding-left: 20px;">
+                    <b>
+                        Limited
+                        English
+                    </b><br>
+
+                    @Html.RadioButtonFor(model => model.LepIndicator, -1, new { @checked = true, @name = "LepIndicator" }) All
+                    @Html.RadioButtonFor(model => model.LepIndicator, true, new { @name = "LepIndicator" }) Yes
+                    @Html.RadioButtonFor(model => model.LepIndicator, false, new { @name = "LepIndicator" }) No
+                </div>
+                <div class="col-lg-2" style="padding-left: 20px;">
+                    <b>Low Income</b><br>
+
+                    @Html.RadioButtonFor(model => model.FrlIndicator, -1, new { @checked = true, @name = "FrlIndicator" }) All
+                    @Html.RadioButtonFor(model => model.FrlIndicator, true, new { @name = "FrlIndicator" }) Yes
+                    @Html.RadioButtonFor(model => model.FrlIndicator, false, new { @name = "FrlIndicator" }) No
+                </div>
+                <div class="col-lg-3" style="padding-left: 20px;"></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3"
+                     style="padding-bottom: 10px; padding-left: 20px;">
+                    <b>Race</b><br>
+                    @Html.DropDownListFor(m => m.DropDown.Race.SelectedRace, Model.DropDown.Race.RaceItems, new { @class = "form-control", @id = "ddlRace" })
+                </div>
+                <div class="row">
+                    <div class="col-lg-3"
+                         style="padding-bottom: 10px; padding-left: 20px;">
+                        <b>Gender</b><br>
+                        @Html.DropDownListFor(m => m.DropDown.Gender.SelectedGender, Model.DropDown.Gender.GenderItems, new { @class = "form-control", @id = "ddlGender" })
+                    </div>
+                    <div class="col-lg-3" style="padding-bottom: 10px; padding-left: 20px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12" style="padding-left:20px;">
+                <label id="ErrorMessage" class="text-danger" style="padding-top:5px;padding-left:1px"></label>
+            </div>
+        </div>
+
+        @using (Html.BeginForm("UpdateGrid", "TeacherSummaryReport", FormMethod.Get, new { id = "formUpdateGrid" }))
+        {
+            <div class="row">
+                <div class="col-lg-6" style="padding:0 0 10px 15px;">
+                    <button id="btnUpdateGrid" class="btn btn-primary" style="width:150px;">
+                        &nbsp;Update
+                    </button>
+                    <br />
+                </div>
+
+            </div>
+            <input type="hidden" id="school" name="school" />
+            <input type="hidden" id="teacher" name="teacher" />
+            <input type="hidden" id="year" name="year" />
+            <input type="hidden" id="classId" name="classId" />
+            <input type="hidden" id="race" name="race" />
+            <input type="hidden" id="gender" name="gender" />
+            <input type="hidden" id="hispanic" name="hispanic" />
+            <input type="hidden" id="frlIndicator" name="frlIndicator" />
+            <input type="hidden" id="iepIndicator" name="iepIndicator" />
+            <input type="hidden" id="lepIndicator" name="lepIndicator" />
+        }
+    </div>
+</div>
+<div class="container">
+    <div style="background: #58595B;color:white;">
+        <div class="row" style="padding-left:10px;padding-bottom:10px">
+            <div class="col-lg-10"><h2 style="color:white;">Summary Report</h2> </div>
+            <div class="col-lg-2 summary-report-toggle" style="padding-left: 17px; padding-top: 20px"><button id="btnToggleValues" name="btnToggleValues" style="width: 150px;" class="btn btn-primary" disabled='@Disabled'><span id="toggleText">@toggleText.ToString()</span></button>&nbsp;&nbsp;</div>
+        </div>
+        <div class="row" style="padding-left:10px;padding-bottom:10px">
+            @Html.Partial("_ReportFilter", (EDS.Models.ReportFilterViewModel)ViewBag.ReportFilters)
+        </div>
+    </div>
+    <div class="form-horizontal" style="float:left;width:100%;">
+        <table style="width:100%">
+            <tr style="background: #231F20;color:white;">
+                <td style="width:1%;">&nbsp;</td>
+                <td style="width:5%;"><b>Grade</b></td>
+                <td style="width:16%;"><b>Subject</b></td>
+                <td style="width:16%;"><b>Assessment</b></td>
+                <td style="width:5%;"><b>Students</b></td>
+                <td style="text-align:right;width:15%"><b>@ViewBag.ViewMeetExceedandImpact</b></td>
+                <td style="text-align:right;width:15%"><b>Weighting</b></td>
+                <td style="text-align:right;width:23%;padding-right:10px"><b>Weighted Impact</b></td>
+            </tr>
+            @{
+                var prevGrade = 0;
+                var prevSubject = string.Empty;
+                var prevAssessment = string.Empty;
+                bool firstRec = true;
+                decimal totalWeightedImpact = 0;
+                bool isEven = false;
+                var backgroundColor = GetRowBackgroundColor(isEven);
+                
+                var summaryListCount = Model.SummaryList.Count;
+                int index = 0;
+                foreach (EDS.Models.TIRSummary summary in @Model.SummaryList)
+                {
+                    index++;
+                    var isGradeImpactCalculated = false;
+                    var isSubjectImpactCalculated = false;
+
+                    if (!firstRec && (prevSubject != summary.SubjectDesc || prevGrade != @summary.GradeLevel))
+                    {
+                        if (!ViewBag.ViewMeetExceedSummary)
+                        {
+                            <tr style="background:@backgroundColor:">
+                                <td colspan="7">&nbsp;</td>
+                                <td style="text-align: right; padding-right: 26px; border-top: solid thin;"><b>@String.Format("{0:0.00}", @GradeImpact)</b></td>
+                            </tr>
+                            <tr style="background:@backgroundColor:">
+                                <td colspan="8">&nbsp;</td>
+                            </tr>
+                            GradeImpactCalculation();
+                            isGradeImpactCalculated = true;
+
+                            GradeImpact = 0;
+
+                            if (prevSubject != summary.SubjectDesc)
+                            {
+                                SubjectImpactCalculation();
+                                isSubjectImpactCalculated = true;
+                                <tr style="background:@backgroundColor:">
+                                    <td colspan="7" style="border-top:solid thin;"></td>
+                                    <td style="border-top:solid thin;text-align:right;padding-right:7px;">
+                                        <b>SUBJECT IMPACT: @String.Format("{0:0.00}", @totalSubjectImpact)</b>
+                                        <span class="meet-exceed-arrow meet-exceed-arrow-@(new EDS.Models.TIRSummary().GetMeetExceedImpactCategory(totalSubjectImpact, !ViewBag.ViewMeetExceedSummary))">&nbsp;</span>
+                                    </td>
+                                </tr>
+                                <tr style="background:@backgroundColor:">
+                                    <td style="height:20px" colspan="8"> </td>
+                                </tr>
+                                sumOfMaxStudent = 0;
+                                sumOfMaxStudentMultiplyGradeImpact = 0;
+                            }
+                        }
+                        else
+                        {
+                            <tr style="background:@backgroundColor:">
+                                <td colspan="7" style="border-top:solid thin;"> </td>
+                                <td style="border-top:solid thin;text-align:right;padding-right:26px;"><b>SUBJECT IMPACT: @String.Format("{0:0.00}", @totalSubjectImpact)</b></td>
+                            </tr>
+                            <tr style="background:@backgroundColor:">
+                                <td style="height:20px" colspan="8"> </td>
+                            </tr>
+                        }
+
+                        maxStudent = 0;
+                        totalSubjectImpact = 0;
+                    }
+                    firstRec = false;
+                    GradeImpact = GradeImpact + summary.WeightedImpact;
+
+                    if (summary.NoOfStudent > maxStudent)
+                    {
+                        maxStudent = summary.NoOfStudent;
+                    }
+
+                    if ((index == summaryListCount) && (!ViewBag.ViewMeetExceedSummary))
+                    {
+                        if (!isGradeImpactCalculated)
+                        {
+                            GradeImpactCalculation();
+                        }
+
+                        if (!isSubjectImpactCalculated)
+                        {
+                            SubjectImpactCalculation();
+
+                        }
+                    }
+
+                    if (ViewBag.ViewMeetExceedSummary)
+                    {
+                        totalSubjectImpact = totalSubjectImpact + (decimal)summary.WeightedImpact;
+                        totalWeightedImpact = totalWeightedImpact + (decimal)summary.WeightedImpact;
+                    }
+                    <tr style="background:@backgroundColor:">
+                        <td> </td>
+                        @{
+                    if (prevSubject != summary.SubjectDesc || prevGrade != @summary.GradeLevel)
+                    {
+                        prevGrade = @summary.GradeLevel;
+                        isEven = !isEven;
+                        backgroundColor = GetRowBackgroundColor(isEven);
+                        <td>@summary.GradeLevel</td>
+                            <td>@summary.SubjectDesc</td>
+                    }
+                    else
+                    {
+                        <td> </td>
+                        if (!ViewBag.ViewMeetExceedSummary)
+                        {
+                            <td> </td>
+                        }
+                        else
+                        {
+                            <td>@summary.SubjectDesc</td>
+                        }
+                    }
+                    string detailReportType;
+                    prevSubject = summary.SubjectDesc;
+
+                    bool viewScaledScore = ViewBag.ViewMeetExceedSummary;
+                    if (@summary.ShowScaledScoreByDefault(summary.ReportTemplateId))
+                    {
+                        viewScaledScore = true;
+                    }
+                    detailReportType = "AssessmentDetail?subject=" + summary.SubjectId
+                        + "&year=" + summary.YearId
+                        + "&assessmentTypeDesc=" + Url.Encode(summary.AssessmentTypeDesc)
+                        + "&viewScaledScore=" + viewScaledScore
+                        + "&teacher=" + summary.TeacherId
+                        + "&grade=" + summary.GradeLevel
+                        + "&classId=" + summary.ClassId
+                        + "&race=" + Model.DropDown.Race.SelectedRace
+                        + "&gender=" + Model.DropDown.Gender.SelectedGender
+                        + "&frlIndicator=" + Model.FrlIndicator
+                        + "&iepIndicator=" + Model.IepIndicator
+                        + "&lepIndicator=" + Model.LepIndicator
+                        + "&hispanic=" + Model.Hispanic
+                        + "&assessmentTypeId=" + summary.AssessmentTypeId
+                        + "&reportTemplateId=" + summary.ReportTemplateId
+                        + "&cameFromTitle=Summary Report";
+                        }
+                        <td>
+                            @if (summary.IsAssessmentExist)
+                            {
+                                <a href="~/TeacherDetailReport/@detailReportType">@summary.AssessmentCode</a>
+                            }
+                            else
+                            {
+                                @summary.AssessmentCode
+                            }
+                        </td>
+
+                        <td style="text-align: right;">@(summary.IsAssessmentExist ? summary.NoOfStudent : (int?)null)</td>
+                        
+                        <td style="text-align: right;">
+                            <div>
+                                <div class="@meetExceedColumnAlignmentCss" style="float: left; width: 47px;">   @(summary.IsAssessmentExist ? String.Format("{0:0.0}", summary.AverageOrMEValue) + ViewBag.PercentSign : Html.Raw("&nbsp;"))</div>
+
+                                <div class="@meetExceedColumnAlignmentCss" style="margin-left: 0px;">
+                                    @if (summary.IsAssessmentExist && summary.NoOfStudent == 0)
+                                    {
+                                        <span class="meet-exceed-arrow meet-exceed-arrow-0 @meetExceedArrowAlignmentCss">&nbsp;</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="meet-exceed-arrow meet-exceed-arrow-@summary.GetMeetExceedArrow(summary.AverageOrMEValue, summary.MeetExceedCategory, !ViewBag.ViewMeetExceedSummary) @meetExceedArrowAlignmentCss">&nbsp;</span>
+                                    }
+                                </div>
+                                @if (!ViewBag.ViewMeetExceedSummary)
+                                {
+                                    <div style="float: left; margin-left: 10px; ">@summary.MeetExceedPointsDispaly</div>
+                                    <div style="float: right; margin-left: 10px;">   <a href="#" id="AssessmentHelp" data-assessmentgradecategoryid="@summary.AssessmentGradeWeightingId" data-gradelevel="@summary.GradeLevel" data-subjectdesc='@summary.SubjectDesc' data-assessmentcode='@summary.AssessmentCode'><img src="~/content/images/help_icon.png" /></a></div>
+
+                                }
+                                else
+                                {
+                                    if (summary.IsAssessmentExist) { WeightedImpactpaddingright = "7px"; } else { WeightedImpactpaddingright = "26px"; }
+                                }
+                            </div>
+                            <div style="clear: both;"></div>
+                        </td>
+                        <td style="text-align:right;">@summary.Weighting%</td>
+
+                        <td style="text-align: right; padding-right:@WeightedImpactpaddingright">
+                            @String.Format("{0:0.00}", @summary.WeightedImpact)
+                            @if (ViewBag.ViewMeetExceedSummary)
+                            {
+                                <span class="meet-exceed-arrow meet-exceed-arrow-@summary.GetMeetExceedArrow(summary.AverageOrMEValue, summary.MeetExceedCategory, !ViewBag.ViewMeetExceedSummary)">&nbsp;</span>
+                            }
+                        </td>
+                    </tr>
+                } //end for
+
+                if (!ViewBag.ViewMeetExceedSummary)
+                {
+                    totalWeightedImpact = (totMaxStudent == 0) ? 0 : decimal.Round((decimal)sumOfMaxStudentMultiplySubjectImpact / totMaxStudent, summaryDecimalPlace, MidpointRounding.AwayFromZero);
+
+                    <tr style="background:@GetRowBackgroundColor(isEven):">
+                        <td colspan="7">&nbsp;</td>
+                        <td style="text-align: right; padding-right: 26px; border-top: solid thin;"><b>@String.Format("{0:0.00}", @GradeImpact)</b></td>
+                    </tr>
+                    <tr style="background:@GetRowBackgroundColor(isEven):">
+                        <td style="height:26px" colspan="8"> </td>
+                    </tr>
+                    <tr style="background:@GetRowBackgroundColor(isEven):">
+                        <td colspan="7" style="border-top:solid thin;"> </td>
+                        <td style="text-align: right; padding-right: 7px; border-top: solid thin;">
+                            <b>SUBJECT IMPACT: @String.Format("{0:0.00}", @totalSubjectImpact)</b>
+                            <span class="meet-exceed-arrow meet-exceed-arrow-@(new EDS.Models.TIRSummary().GetMeetExceedImpactCategory(totalSubjectImpact, !ViewBag.ViewMeetExceedSummary))">&nbsp;</span>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    <tr style="background:@GetRowBackgroundColor(isEven):">
+                        <td colspan="7" style="border-top:solid thin;"> </td>
+                        <td style="text-align: right; padding-right: 26px; border-top: solid thin;">
+                            <b>SUBJECT IMPACT: @String.Format("{0:0.00}", @totalSubjectImpact)</b>
+                        </td>
+                    </tr>
+                }
+
+            }
+            <tr>
+                <td colspan="7" style="background: #EEEEEE;"> </td>
+
+                <td class="footer-ribbon-color footer-ribbon-color-@(new EDS.Models.TIRSummary().GetMeetExceedImpactCategory(totalWeightedImpact, !ViewBag.ViewMeetExceedSummary))">
+                    <img style="float:left" src="~/content/images/right_arrow_light-gray.png" />
+                    <span style="font-weight: bold; vertical-align: -16px">TOTAL IMPACT: @String.Format("{0:0.00}", @totalWeightedImpact)</span>
+                </td>
+
+            </tr>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            &copy; 2014 Education Data Solutions, Inc. - All Rights Reserved
+        </div>
+        <div class="col-lg-4" style="text-align: right; padding-right: 22px">
+            <img src="~/content/images/small_arrow_un.png" />&nbsp;Unsatisfactory&nbsp;<img src="~/content/images/small_arrow_below.png" />&nbsp;Below&nbsp;<img src="~/content/images/small_arrow_meets.png" />&nbsp;Meets&nbsp;<img src="~/content/images/small_arrow_exceeds.png" />&nbsp;Exceeds
+        </div>
+    </div>
+</div>
+<div class="modal Grade-dialog" id="modalAssessmentHelp" tabindex="-1" role="dialog" aria-labelledby="modalAssessmentHelp" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 280px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="TitleCategoryLabel"><span id="TitleCategory"></span></h4>
+                <h5 class="modal-title" id="SubTitleCategoryLabel"><span id="SubTitleCategory"></span></h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-2"><b>Min</b></div>
+                    <div class="col-lg-2" style='padding-left:26px;'><b>Max</b></div>
+                    <div class="col-lg-2" style='padding-left:46px;'><b>Category</b></div>
+                </div>
+                <span id="spanGradeCategory"></span>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Stylesheets{
+    <link href="~/Content/TIRSummary.css" rel="stylesheet" />
+    <link href="~/Content/Report.css" rel="stylesheet" />
+}
+@section Scripts {
+
+    <style type="text/css">
+        .Grade-dialog {
+            overflow-y: hidden;
+            top: 30%;
+            left: 30%;
+            bottom: auto;
+        }
+
+        body.modal-open {
+            overflow: visible;
+        }
+    </style>
+    <script type="text/javascript">
+
+        $(function () {
+
+            $('#btnUpdateGrid').click(function (e) {
+                if (validateForm()) {
+                    e.preventDefault();
+                    $('#school').val($('#ddlSchool').val());
+                    $('#teacher').val($('#ddlTeacher').val());
+                    $('#year').val($('#ddlYear').val());
+                    $('#classId').val($('#ddlClass').val());
+                    $('#formSearch').submit();
+                    $('#ErrorMessage').text("");
+
+                    updateGrid();
+                }
+                else {
+
+                    return false;
+                }
+            });
+
+            $('#ddlSchool').change(function () {
+                if ('@(((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)' == 'False') {
+                    UpdateTeacherBySchool($('#ddlSchool').val(), $('#ddlYear').val());
+                }
+            });
+
+
+            $('#ddlTeacher').change(function () {
+                if ('@(((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)' == 'False') {
+                    UpdateClassDropDown();
+                }
+            });
+
+            $('#ddlYear').change(function () {
+                if ('@(((EDS.Models.SiteUser)Session["SiteUser"]).isTeacher)' == 'False') { 
+                    UpdateTeacherBySchool($('#ddlSchool').val(), $('#ddlYear').val());
+                }
+                UpdateSchoolByYear($('#ddlYear').val());
+                UpdateClassDropDown();
+            });
+        });
+
+
+        function UpdateSchoolByYear(schoolYearId) {
+            $.ajax({
+                url: "/JsonService/RefreshSchoolByYear?schoolYearId=" + schoolYearId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#ddlSchool').empty();
+                $('select#ddlSchool').append('<option value="-1">--All--</option>');
+                $.each(response, function (key, ddlData) {
+                    $('select#ddlSchool').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+
+
+        function UpdateTeacherBySchool(schoolId, schoolYearId) {
+            $.ajax({
+                url: "/JsonService/RefreshTeacherBySchool?schoolId=" + schoolId + "&schoolYearId=" + schoolYearId,
+                type: "POST",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $('#ddlTeacher').empty();
+                $('select#ddlTeacher').append('<option value="-1">--All--</option>');
+                $.each(response, function (key, ddlData) {
+                    $('select#ddlTeacher').append(
+                            '<option value="' + ddlData.Id + '">'
+                            + ddlData.Name +
+                            '</option>');
+                })
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        //----------------------------------------------US-105------------------
+        function UpdateClassDropDown() {
+            $("#ddlClass").prop("disabled", true);
+            $.ajax({
+                url: "/JsonService/RefreshClassByTeacher/",
+                type: "POST",
+                datatype: "json",
+                data: { yearId: $('#ddlYear').val(), teacherId: $('#ddlTeacher').val(), schoolId: $('#ddlSchool').val() }
+            })
+            .then(
+            function (response) {
+                $('#ddlClass').empty();
+                if (response != null && response != "") {
+                    if (response.length > 1) {
+                        $('select#ddlClass').append('<option value="-1">--All--</option>');
+                    }
+                    $.each(response, function (key, ddlData) {
+                        $('select#ddlClass').append(
+                                   '<option value="' + ddlData.Id + '">'
+                                   + ddlData.Name +
+                                   '</option>');
+
+                    })
+                    $("#ddlClass").prop("disabled", false);
+                }
+                else {
+                    $("#ddlClass").prop("disabled", true);
+                }
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+
+        function displayDetails(displayId) {
+            $.ajax({
+                url: "/Students/Details/" + displayId,
+                type: "GET",
+                datatype: "json"
+            })
+            .then(
+            function (response) {
+                $("#spanStudentNameTitle").html(response.firstName + " " + response.lastName);
+                $("#spanStudentName").html(response.firstName + " " + response.lastName);
+                $("#spanGradeLevel").html(response.gradeLevel);
+                $("#spanStateId").html(response.stateId);
+                $("#spanLocalId").html(response.localId);
+                $("#spanHomeSchool").html(response.homeSchool);
+
+                $('#myModal').modal('show')
+            },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        }
+
+        function updateGrid() {
+            $('#year').val($('#ddlYear').val());
+            $('#teacher').val($('#ddlTeacher').val());
+            $('#school').val($('#ddlSchool').val());
+            $('#classId').val($('#ddlClass').val());
+            $('#race').val($('#ddlRace').val());
+            $('#gender').val($('#ddlGender').val());
+            $('#hispanic').val($("input:radio[name=Hispanic]:checked").val());
+            $('#frlIndicator').val($("input:radio[name=FrlIndicator]:checked").val());
+            $('#iepIndicator').val($("input:radio[name=IepIndicator]:checked").val());
+            $('#lepIndicator').val($("input:radio[name=LepIndicator]:checked").val());
+
+            $('#formUpdateGrid').submit();
+        }
+
+        function validateForm() {
+            var formIsValid = true;
+            $('select').each(function () {
+                if (this.value == -1 && this.id != 'ddlClass' && this.id != 'ddlRace' && this.id != 'ddlGender') {
+                    formIsValid = false;
+                    $('#ErrorMessage').text("All values are required");
+                }
+            });
+            if (formIsValid) {
+                if ($('#ddlClass').val() == null || $('#ddlClass').val() == "") {
+                    $('#ErrorMessage').text("No Class Exists");
+                    return false;
+                }
+            }
+            return formIsValid;
+        }
+
+        $('a#AssessmentHelp').click(function (event) {
+            event.preventDefault();
+            var id = $(this).data('assessmentgradecategoryid');
+            var Grade = ($(this).data('gradelevel'));
+            var Subject = ($(this).data('subjectdesc'));
+            var CategoryType = ($(this).data('assessmentcode'));
+            $("#TitleCategory").html(CategoryType + " Assessment");
+            $("#SubTitleCategory").html("Subject : " + Subject + "<span style='padding-left:25px;'></span>  Grade : " + Grade);
+            $.ajax({
+                url: "/JsonService/GetGradeCategoryByGradeWaitingID/" + id,
+                type: "POST",
+                datatype: "json"
+            })
+           .then(
+           function (response) {
+               if (response.length > 0) {
+                   var $textAndPic = "";
+                   $.each(response, function (i, item) {
+                       var minValue = "";
+                       var maxValue = "";
+                       if (item.Min.toString().indexOf(".") != -1) {
+                           minValue = item.Min.toString().split('.')[0] + "." + item.Min.toString().split('.')[1].substring(0, 1);
+                       }
+                       else {
+                           minValue = item.Min + ".0";
+                       }
+                       if (item.Max.toString().indexOf(".") != -1) {
+                           maxValue = item.Max.toString().split('.')[0] + "." + item.Max.toString().split('.')[1].substring(0, 1);
+                       }
+                       else {
+                           maxValue = item.Max + ".0";
+                       }
+                       $textAndPic = $textAndPic + "<div class='row' style='margin-left: -14px; margin-right: -79px;'><div class='col-lg-2'><span style='display: inline-block;float: right;'>" + minValue + "</span></div><div class='col-lg-2'><span style='display: inline-block;float: right;'>" + maxValue + "</span></div><div class='col-lg-2' style='padding-left:25px;'>" + item.Category + "</div></div>";
+                   });
+                   $('#modalAssessmentHelp').modal('show');
+                   $("#spanGradeCategory").html($textAndPic);
+               }
+               else {
+                   $('#modalAssessmentHelp').modal('show');
+                   $("#spanGradeCategory").html("<div class='row'><div class='col-lg-10'>No Record Found</div></div>");
+               }
+           },
+            function (xhr, status) {
+                alert("error: " + xhr.statusText);
+            });
+        });
+
+
+        $(function () {
+            $('#btnToggleValues').click(function () {
+                if ("@ViewBag.SummaryLink" == "SummaryReportById") {
+                    location.href = '@Html.Raw(@Url.Action("SummaryReportById", "TeacherSummaryReport", new {TeacherId = ViewBag.TeacherFilter, ViewMeetExceedSummary = ViewBag.ViewMeetExceedSummary }))';
+                }
+                else if ("@ViewBag.SummaryLink" == "SummaryReport") {
+                    location.href = '@Html.Raw(@Url.Action("SummaryReport", "TeacherSummaryReport", new {ViewMeetExceedSummary = ViewBag.ViewMeetExceedSummary }))';
+                }
+                else {
+                    location.href = '@Html.Raw(@Url.Action("UpdateGrid", "TeacherSummaryReport", new
+                                {
+                                    teacher = ViewBag.TeacherFilter,
+                                    school = ViewBag.SchoolFilter,
+                                    year = ViewBag.YearFilter,
+                                    classId = ViewBag.ClassFilter,
+                                    ViewMeetExceedSummary = ViewBag.ViewMeetExceedSummary,
+                                    race = ViewBag.Race,
+                                    gender = ViewBag.Gender,
+                                    frlIndicator = ViewBag.FrlIndicator,
+                                    iepIndicator = ViewBag.IEPIndicator,
+                                    lepIndicator = ViewBag.LEPIndicator,
+                                    hispanic = ViewBag.Hispanic
+                                }))';
+                }
+            });
+
+            $("#lnkReportFilters").click(function () {
+                $("#divReportFilters").toggle('slow');
+                return false;
+            });
+
+            if ("@ViewBag.ReportFilters.IsAdmin" == "True") {
+                $("#lnkReportFilters").show();
+            }
+            if ("@ViewBag.ReportFilters.DisplayAdminFilters" == "True") {
+                $("#divReportFilters").show();
+            }
+        })
+
+    </script>
+}

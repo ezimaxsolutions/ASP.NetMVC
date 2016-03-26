@@ -1,0 +1,237 @@
+﻿@{
+    ViewBag.Title = "Assessment Detail Report";
+    Layout = "~/Views/Shared/_LayoutReports.cshtml";
+    var rawDetailUrl = string.Empty;
+    string topHeaderColumns = string.Empty;
+    var templateFiles = string.Empty;
+    var sloFileName = string.Empty;
+    var rubricFileName = string.Empty;
+    int columnCount = 0;
+    List<decimal> avgImpacts = null;
+}
+@model EDS.Models.HeirarchicalTIRDetailModel
+@using EDS.Helpers
+
+@functions {
+    string GenerateTopHeaderForAssessment(EDS.Models.HeirarchicalScoreData scoreData, EDS.Models.AssessmentMEPerc assessmentMEPerc, bool hasChildren, string detailUrl)
+    {
+        string templateHtmlElement = "<td class='col-assessment-header' colspan='3' align='center'><u><b><a href='{0}&AssessmentTypeId={1}"
+                + "&InputTermId={2}'>{3}</a></b></u></td>";
+
+        string headerColumn = string.Empty;
+        if (hasChildren)
+        {
+            headerColumn = string.Format(templateHtmlElement,
+                detailUrl,
+                scoreData.AssessmentTypeId,
+                assessmentMEPerc.SchoolTermId,
+                scoreData.AssessmentCode);
+        }
+        else
+        {
+            headerColumn = "<td class='col-assessment-header' colspan='3' align='center'><u><b>" + scoreData.AssessmentCode + "</b></u></td>";
+        }
+        return headerColumn;
+    }
+}
+
+@{
+
+    if (Model.details != null && Model.details.Count > 0)
+    {
+        /***INITIALIZATION OF DISPLAY DATA*******************************/
+        int fixedColumnsCount = 1; //student
+        int assessmentColumnsCount = 3; //score, Target, impact
+        columnCount = fixedColumnsCount + (Model.details[0].ScoreDataCollection.Count * assessmentColumnsCount);
+        string detailTitle = Model.details[0].ScoreDataCollection[0].AssessmentDesc;
+        var toggleText = ViewBag.ViewScaledScore == true ? "View Raw Scores" : "View Scaled Scores";
+        ViewBag.ViewScaledScore = !ViewBag.ViewScaledScore;
+        avgImpacts = ViewBag.avgImpacts;
+
+        templateFiles = string.Empty;
+        sloFileName = Model.details[0].SLOFileName;
+        rubricFileName = Model.details[0].RubricFileName;
+        if (!string.IsNullOrEmpty(sloFileName))
+        {
+            templateFiles = "<a id='linkSLO' class='file-icon-padding' href='#'><img src='" + Url.Content("~/content/icons/pdf.ico") + "'/>SLO</a>";
+        }
+        if (!string.IsNullOrEmpty(rubricFileName))
+        {
+            templateFiles += "<a id='linkRubric' class='file-icon-padding' href='#'><img src='" + Url.Content("~/content/icons/pdf.ico") + "'/>Rubric</a>";
+        }
+
+        /***INITIALIZATION OF WEB GRID WITH COLUMN DEFINITIONS**************/
+        WebGrid grid = new WebGrid(source: Model.details, defaultSort: "LastName", canPage: false, canSort:false);
+        string projectionTitle = ViewBag.Projection;
+        string percentileTitle = ViewBag.DistPercentile;
+       
+        dynamic assessmentDetailRouteValues = new
+            {
+                subject = ViewBag.subject,
+                year = ViewBag.Year,
+                assessmentTypeDesc = ViewBag.AssessmentTypeDesc,
+                teacher = ViewBag.Teacher,
+                classid = ViewBag.ClassID,
+                grade = ViewBag.Grade,
+                viewScaledScore = false,
+                summaryCount = ViewBag.SummaryCount,
+                Race = ViewBag.Race,
+                Gender = ViewBag.Gender,
+                FrlIndicator = ViewBag.FrlIndicator,
+                IEPIndicator = ViewBag.IEPIndicator,
+                LEPIndicator = ViewBag.LEPIndicator,
+                Hispanic = ViewBag.Hispanic,
+                reportTemplateId = ViewBag.ReportTemplateId,
+                cameFromTitle = detailTitle
+            };
+
+        rawDetailUrl = Url.Action("AssessmentDetail", "HeirarchicalTeacherDetailReport", assessmentDetailRouteValues);
+        topHeaderColumns = "<tr class='row-assessment-headers'><td class='col-assessment-header'></td>";
+
+        List<WebGridColumn> webGridColumns = new List<WebGridColumn>();
+        var colStudent = grid.Column("LastName", "Student",
+            @<text>
+                <label class="col-student-label">@Html.ActionLink((string)item.StudentName, "Index", "StudentHistory", new { StudentId = item.StudentId, cameFromTitle = detailTitle, showRawScale = !ViewBag.ViewScaledScore, summaryCount = ViewBag.SummaryCount }, null)</label>
+            </text>,
+            "col-student");
+        webGridColumns.Add(colStudent);
+
+        /*Generating group of columns for each assessment*/
+        for (int i = 1; i <= Model.details[0].ScoreDataCollection.Count; i++)
+        {
+            var index = i - 1;
+            var innerColCss = i > 1 ? "inner" : "first";
+            bool isChildExist = index != 0 ? Model.AssessmentList[index].IsChildExist : false;
+
+            topHeaderColumns += GenerateTopHeaderForAssessment(Model.details[0].ScoreDataCollection[index], Model.AssessmentList[0], isChildExist, rawDetailUrl);
+
+            var scoreColumn = grid.Column("ScoreDataCollection[" + index + "].Score", "Score" + Html.SortDirection(ref grid, "ScoreDataCollection[" + index + "].Score"), null, "column-cell col-score-" + innerColCss);
+            scoreColumn.Format = (item) => item.ScoreDataCollection[index].ScoreDisplay;
+            webGridColumns.Add(scoreColumn);
+
+            var projectionColumn = grid.Column("ScoreDataCollection[" + index + "].Projection", projectionTitle + Html.SortDirection(ref grid, "ScoreDataCollection[" + index + "].Projection"), null, "column-cell col-projection-" + innerColCss);
+            projectionColumn.Format = (item) => item.ScoreDataCollection[index].ProjectionDisplay;
+            webGridColumns.Add(projectionColumn);
+
+            var impactColumn = grid.Column("ScoreDataCollection[" + index + "].Impact", "+/-" + Html.SortDirection(ref grid, "ScoreDataCollection[" + i + "].Impact"), null, "column-cell-impact col-impact col-meet-exceed-" + innerColCss);
+
+
+            impactColumn.Format =  @<text>@item.ScoreDataCollection[index].ImpactDisplay <span class="meet-exceed-arrow meet-exceed-arrow-@item.ScoreDataCollection[index].MeetExceedValue">&nbsp;</span></text>;
+            webGridColumns.Add(impactColumn);
+
+
+            if (ViewBag.ShowPercentile == true)
+            {
+                var percentileColumn = grid.Column("ScoreDataCollection[" + i + "].Percentile", percentileTitle + Html.SortDirection(ref grid, "ScoreDataCollection[" + i + "].Percentile"), null, "col-percentile col-endof-assessment col-percentile-" + innerColCss);
+                percentileColumn.Format = (item) => item.ScoreDataCollection[index].PercentileDisplay;
+                webGridColumns.Add(percentileColumn);
+            }
+        }
+        topHeaderColumns += "</tr>";
+        Html.RenderAction("Breadcrum", new { currentViewTitle = detailTitle });
+
+
+        <div class="container">
+            <div class="report-header">
+                <div class="row report-title">
+                    <div class="col-lg-7">
+                        <h2 style="color:white;">@detailTitle</h2>
+                    </div>
+
+                    <div class="col-lg-2 term-dropdown">
+                        <div>@Html.DropDownList("SchoolTermList", null, new { @class = "form-control" })</div>
+                    </div>
+
+                </div>
+                <div class="row report-column-headers">
+                    @Html.Partial("_ReportFilter", (EDS.Models.ReportFilterViewModel)ViewBag.ReportFilters)
+                </div>
+            </div>
+
+
+            @grid.GetHtml(
+            tableStyle: "grid-report tirDetailGrid",
+            headerStyle: "row-report-columns",
+            rowStyle: "row-normal",
+            alternatingRowStyle: "row-alternate",
+            columns: webGridColumns
+        )
+
+            <div class="row row-copyright">
+                <div class="col-lg-8">
+                    &copy; 2014 Education Data Solutions, Inc. - All Rights Reserved
+                </div>
+                <div class="col-lg-4" style="text-align:right;padding-right:22px">
+                    <span class="meet-exceed-legent-title">Exceeds</span>
+                    <div class="meet-exceed-legend meet-exceed-arrow-1 meet-exceed-arrow">&nbsp;</div>
+                    <span class="meet-exceed-legent-title">Meets</span>
+                    <div class="meet-exceed-legend meet-exceed-arrow-0 meet-exceed-arrow">&nbsp;</div>
+                    <span class="meet-exceed-legent-title">Below</span>
+                    <div class="meet-exceed-legend meet-exceed-arrow--1 meet-exceed-arrow">&nbsp;</div>
+                    <span class="meet-exceed-legent-title">Unsatisfactory</span>
+                    <div class="meet-exceed-legend meet-exceed-arrow--2 meet-exceed-arrow">&nbsp;</div>
+                    <div style="clear:both;"></div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<div class="modal fade" id="modalAssessmentTemplate" tabindex="-1" role="dialog" aria-labelledby="modalAssessmentLabel" aria-hidden="true">
+    <div class="modal-dialog-Assessment">
+        <div class="modal-content">
+            <div class="modal-header-assessment">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:0px">
+                <div class="iframe-container">
+                    <iframe id="assessmentTempIframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Stylesheets{
+    <link href="~/Content/HeirarchicalTIRDetail.css" rel="stylesheet" />
+    <link href="~/Content/Report.css" rel="stylesheet" />
+    @Styles.Render("~/bundles/dataTablesCss")
+}
+@section Scripts {
+    <script src="~/Scripts/app/tirHeirarchicalDetailReport.js"></script>
+    @Scripts.Render("~/bundles/dataTablesJs")
+    <script type="text/javascript">
+        /**************************************************************/
+        var reportType = '@Model.ReportType';
+        var detailUrl = '@HttpUtility.JavaScriptStringEncode(rawDetailUrl)';
+        /**************************************************************/
+        var headerRowTemplate = "@Html.Raw(topHeaderColumns)";
+        /**************************************************************/
+        var reportFooterTemplate = "<tfoot>" +
+        "<tr><td colspan='1' style='background: #EEEEEE;'>@Html.Raw(templateFiles)</td>" +
+        @for (int cntr = 0; cntr < Model.details[0].AssessmentCount; cntr++)
+        {
+            string prevCategory = cntr == 0 ? "default" : Convert.ToString(Model.AssessmentList[cntr - 1].MeetExceedCategory);
+            <text>
+                    "<td colspan='3' class='footer-ribbon-color footer-ribbon-color-@Model.AssessmentList[cntr].MeetExceedCategory'>" +
+                     "<img class='footer-ribbon-arrow footer-ribbon-arrow-@prevCategory' />" +
+                    "<div style='font-weight:bold; padding:7px 0 2px 0'>AVG. IMPACT: @String.Format("{0:0.0}", avgImpacts[cntr])</div>" +
+                    "<div style='font-weight:bold'>M/E TOTAL %: @String.Format("{0:0.0}", @Model.AssessmentList[cntr].MeetExceedPerc)</div>" +
+                    "</td>" +
+               </text>
+        }
+        "</tr></tfoot>";
+
+        /**************************************************************/
+        $(function () {
+            /*format the grid with header, footer, and icons*/
+            tirHeirarchicalDetailReport.insertHeadersToReportGrid(headerRowTemplate, '@columnCount');
+            tirHeirarchicalDetailReport.displayPercentSymbol('@ViewBag.ShowPercentile');
+            tirHeirarchicalDetailReport.adjustColumnHeaderStyle();
+            tirHeirarchicalDetailReport.appendFooterToReportGrid(reportFooterTemplate);
+            tirHeirarchicalDetailReport.displayFotterRibbonArrows();
+            tirHeirarchicalDetailReport.uploadHeirarachicalReportOnTermChange(detailUrl, '@ViewBag.AssessmentTypeId');
+            tirHeirarchicalDetailReport.viewTemplateAttachment('@sloFileName', '@rubricFileName')
+            tirHeirarchicalDetailReport.fixHeaderAndLeftColumn('@columnCount');
+        })
+    </script>
+}

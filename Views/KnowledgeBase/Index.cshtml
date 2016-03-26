@@ -1,0 +1,54 @@
+﻿@using EDS.Helpers
+@model IEnumerable<EDS.Models.KnowledgeBase>
+
+@{
+    ViewBag.Title = "KnowledgeBase";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Knowledge Base</h2>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-4">
+        <button id="btnAdd" class="btn btn-primary">
+            <span class="glyphicon glyphicon-plus-sign"></span>&nbsp;New Item
+        </button>
+    </div>
+</div>
+
+<hr />
+<div>
+    @{
+        WebGrid grid = new WebGrid(source: Model , defaultSort: "Title", canPage: true, rowsPerPage: 20);
+    }
+
+    @grid.GetHtml(
+                tableStyle: "table", 
+                headerStyle: "gridHead",
+                footerStyle: "gridFooter",
+                rowStyle: "gridRow",
+                alternatingRowStyle: "gridAltRow",
+                columns: new[] {
+                                    grid.Column("Title", "Title" + Html.SortDirection(ref grid, "Title")  , format: @<text>@Html.ActionLink((string)item.Title, "KnowledgeBaseDetail", new { KnowledgeBaseId = item.KnowledgeBaseId })  </text>)
+                                }
+                 )
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+
+    <script type="text/javascript">
+        $(function () {
+            if ("@ViewBag.AllowEdit" == "False") {
+                $("#btnAdd").hide();
+            }
+
+            $('#btnAdd').click(function () {
+                window.location.href = "/KnowledgeBase/CreateKnowledgeBaseItem";
+            });
+        });
+    </script>
+}

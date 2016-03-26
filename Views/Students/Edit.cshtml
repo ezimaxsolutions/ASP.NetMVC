@@ -1,0 +1,324 @@
+﻿@model EDS.Models.StudentExt
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int currentYear = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["SchoolYear"]);
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <button id="btnBack" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+                        </button>
+                    </td>
+                    <td>
+                        <h2>Edit Student</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+@using (Html.BeginForm("Edit", "Students", FormMethod.Post, new { id = "formStudent" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+        <h4>Student Details</h4>
+        <table class="table-condensed">
+            <tr>
+                <td valign="top">
+                <td valign="top">
+                    <table class="table-condensed tblstudent-lineheight">
+                        <tbody>
+                            <tr>
+                                <td nowrap="">
+                                    <b>District</b>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.DistrictDesc, new { disabled = "disabled", @readonly = "readonly" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>School</b>
+                                </td>
+                                <td>
+
+                                    @Html.DropDownListFor(m => m.DropDown.School.SelectedSchool, Model.DropDown.School.SchoolItems, new { @class = "form-control", @id = "ddlSchool" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>First Name</b>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.FirstName, new { @class = "reqClass", @maxlength = "128" })
+                                    @Html.ValidationMessageFor(model => model.FirstName)
+                                    <span class="requiredMessage" id="requiredFirstName"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Middle Name</b>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.MiddleName, new { @maxlength = "128" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Last Name</b>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.LastName, new { @maxlength = "128" })
+                                    @Html.ValidationMessageFor(model => model.LastName)
+                                    <span class="requiredMessage" id="requiredLastName"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Lineage</b>
+                                </td>
+                                <td>
+                                    @Html.DropDownListFor(m => m.DropDown.Lineage.SelectedLineage, Model.DropDown.Lineage.LineageItems, new { @class = "form-control", @id = "ddlLineage" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Birth Date</b>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.BirthDate, "{0:MM/dd/yy}", new { @class = "datepicker", @maxlength = "10", @placeholder = "mm/dd/yy" })
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td valign="top" class="tblstudent-vertical-border">
+                    <table class="table-condensed tblstudent-lineheight">
+                        <tbody>
+                            <tr>
+                                <td nowrap=""><b>School Year</b></td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.SchoolYearDesc, new { disabled = "disabled", @readonly = "readonly" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap=""><b>Grade</b></td>
+                                <td>
+                                    @Html.DropDownListFor(m => m.DropDown.Grade.SelectedGrade, Model.DropDown.Grade.GradeItems, new { @class = "form-control", @id = "ddlGrade" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Gender</b>
+                                </td>
+                                <td>
+                                    @Html.DropDownListFor(m => m.DropDown.Gender.SelectedGender, Model.DropDown.Gender.GenderItems, new { @class = "form-control", @id = "ddlGender" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Hispanic</b>
+                                </td>
+                                <td>
+                                    @Html.RadioButtonFor(model => model.Hispanic, true) Yes
+                                    @Html.RadioButtonFor(model => model.Hispanic, false) No
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Race</b>
+                                </td>
+                                <td>
+                                    @Html.DropDownListFor(m => m.DropDown.Race.SelectedRace, Model.DropDown.Race.RaceItems, new { @class = "form-control", @id = "ddlRace" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Home Language</b>
+                                </td>
+                                <td>
+                                    @Html.DropDownListFor(m => m.DropDown.HomeLanguage.SelectedLanguage, Model.DropDown.HomeLanguage.LanguageItems, new { @class = "form-control", @id = "ddlHomeLanguage" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Native Language</b>
+                                </td>
+                                <td>
+                                    @Html.DropDownListFor(m => m.DropDown.NativeLanguage.SelectedLanguage, Model.DropDown.NativeLanguage.LanguageItems, new { @class = "form-control", @id = "ddlNativeLanguage" })
+                                </td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+                </td>
+                <td valign="top" class="tblstudent-vertical-border">
+                    <table class="table-condensed tblstudent-lineheight">
+                        <tbody>
+                            <tr>
+                                <td nowrap=""><b>State Id</b></td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.StateId, new { @maxlength = "128" })
+                                    @Html.ValidationMessageFor(model => model.StateId)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap=""><b>District Id</b></td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.LocalId, new { @maxlength = "128" })
+                                    @Html.ValidationMessageFor(model => model.LocalId)
+                                    <span class="requiredMessage" id="requiredLocalId"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Enrollment Date</b>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.EnrollmentDate, "{0:MM/dd/yy}", new { @class = "datepicker", @maxlength = "10", @placeholder ="mm/dd/yy" })
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Special Education (IEP/504)</b>
+                                </td>
+                                <td>
+                                    @Html.RadioButtonFor(model => model.IepIndicator, true) Yes
+                                    @Html.RadioButtonFor(model => model.IepIndicator, false) No
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Limited English Proficient</b>
+                                </td>
+                                <td>
+                                    @Html.RadioButtonFor(model => model.LepIndicator, true) Yes
+                                    @Html.RadioButtonFor(model => model.LepIndicator, false) No
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td nowrap="">
+                                    <b>Free &amp; Reduced Lunch / LI</b>
+                                </td>
+                                <td>
+                                    @Html.RadioButtonFor(model => model.FrlIndicator, true) Yes
+                                    @Html.RadioButtonFor(model => model.FrlIndicator, false) No
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="btn btn-primary" id="btnSaveStudent">
+                                        Save Student
+                                    </button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </td>
+
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <hr />
+                    <div style="float:left"><h4>School Years:</h4></div>
+                    <div style="float:left; margin:10px 0 0 10px;">
+                        @foreach (var year in Model.SchoolYears)
+                        {
+                            if (year.SchoolYearCode != ViewBag.SchoolYear)
+                            {
+                                <span style="padding:0 5px 0 5px;">@Html.ActionLink(year.SchoolYearDesc, "Edit", "Students", new { studentId = Model.StudentId, schoolYear = year.SchoolYearCode }, null)</span>
+                            }
+                            else
+                            {
+                                <span style="padding:0 5px 0 5px;">@year.SchoolYearDesc</span>
+                            }
+                        }
+
+                    </div>
+                    <div style="clear:both"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <hr />
+                    <h4>Classes</h4>
+                    <table id="tblClassGrid" class="table">
+                        <thead><tr class='gridHead'><th>Class Name</th></tr></thead>
+                        <tbody>
+                            @if (Model.StudentClasses != null && Model.StudentClasses.Count > 0)
+                            {
+                                foreach (var m in Model.StudentClasses)
+                                {
+                                    <tr><td><a href='/Classes/Edit/@m.SchoolClassId'>  @m.ClassDesc </a></td></tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td>No Classes</td></tr>
+                            }
+                        </tbody>
+                    </table>
+            </tr>
+        </table>
+    </div>
+
+    @Html.HiddenFor(model => model.StudentId)
+    @Html.HiddenFor(model => model.StudentSchoolYearId)
+    @Html.HiddenFor(model => model.DistrictId)
+    @Html.HiddenFor(model => model.SchoolYearId)
+    @Html.Hidden("SchoolYear")
+    <input type="hidden" id="hdSchoolId" name="hdSchoolId" />
+    <input type="hidden" id="hdLineageId" name="hdLineageId" />
+    <input type="hidden" id="hdGradeId" name="hdGradeId" />
+    <input type="hidden" id="hdGenderId" name="hdGenderId" />
+    <input type="hidden" id="hdRaceId" name="hdRaceId" />
+    <input type="hidden" id="hdHomeLanguageId" name="hdHomeLanguageId" />
+    <input type="hidden" id="hdNativeLanguageId" name="hdNativeLanguageId" />
+
+}
+
+<link href="~/Content/datepicker.css" rel="stylesheet" />
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+   <script src="~/Scripts/app/studentDetail.js"></script>
+
+    <script type="text/javascript">
+        $('input:text').addClass("form-control");
+
+        if ("@ViewBag.SchoolYear" != "@currentYear") {
+            $("#btnSaveStudent").hide();
+            $('input[type="text"], input[type="radio"], select, input[type="datetime"]').prop("disabled", true);
+        }
+
+        if ("@ViewBag.AllowEdit" == "False") {
+            $("#btnSaveStudent").hide();
+            $('input[type="text"], input[type="radio"], select, input[type="datetime"]').prop("disabled", true);
+        }
+
+        $(function () {
+            studentDetail.loadDatePicker();
+            studentDetail.backButtonClick();
+            studentDetail.clickSaveStudent();
+            studentDetail.checkNegativeAndAlphabets();
+        });
+
+    </script>
+}

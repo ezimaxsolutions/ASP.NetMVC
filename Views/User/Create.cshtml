@@ -1,0 +1,204 @@
+﻿@using EDS.Models
+@model EDS.tblUserExt
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="margin-top:10px">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table-condensed">
+                <tr>
+                    <td>
+                        <button id="btnBack" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;Back
+                        </button>
+                    </td>
+                    <td>
+                        <h2>Add Teacher / Administrator</h2>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+@using (Html.BeginForm("Create", "User", FormMethod.Post, new { id = "formUser" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.SchoolYearId)
+        <table class="table-condensed">
+            <tr>
+                <td>
+                    <h4>Teacher / Administrator Details</h4>
+
+                    <table class="table-condensed">
+                        <tr>
+                            <td nowrap>
+                                <b>District</b>
+                            </td>
+                            <td>
+                                @ViewBag.DistrictDesc
+                            </td>
+                        </tr>
+                       
+                        <tr>
+                            <td nowrap>
+                                <b>User Name</b>
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(model => model.UserName)
+                                @Html.ValidationMessageFor(model => model.UserName)
+                                <span class="requiredMessage" id="requiredUserName"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>Email</b>
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(model => model.UserEmail)
+                                @Html.ValidationMessageFor(model => model.UserEmail)
+                                <span class="requiredMessage" id="requiredUserEmail"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>Password</b>
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(model => model.Password)
+                                @Html.ValidationMessageFor(model => model.Password)
+                                <span class="requiredMessage" id="requiredPassword"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>First Name</b>
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(model => model.FirstName)
+                                @Html.ValidationMessageFor(model => model.FirstName)
+                                <span class="requiredMessage" id="requiredFirstName"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>Last Name</b>
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(model => model.LastName)
+                                @Html.ValidationMessageFor(model => model.LastName)
+                                <span class="requiredMessage" id="requiredLastName"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>State Id</b>
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(model => model.StateId)
+                                @Html.ValidationMessageFor(model => model.StateId)
+                                <span class="requiredMessage" id="requiredStateId"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap>
+                                <b>Role Id</b>
+                            </td>
+                            <td>
+                                @Html.DropDownList("RoleId", null, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.RoleId)
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+                <td style="border-left:solid 1px #d9d9d9">&nbsp;</td>
+                <td valign="top">
+
+                    <h4>Schools</h4>
+
+                    <table>
+                        <tr>
+                            <td>
+                                <table>
+                                    @for (int i = 0; i <= ((Model.Schools.Count() - 1) / 2); i++)
+                                    {
+                                        var className = Model.Schools[i].IsLocked ? "DCB" : "SCB";
+                                        <tr>
+                                            <td width="300px">
+                                                @Html.CheckBoxFor(m => m.Schools[i].Checked, new { @id = "userSchoolId_" + i, @class = className })
+                                                @Html.DisplayFor(m => m.Schools[i].Text)
+                                                @Html.HiddenFor(m => m.Schools[i].Id, new { @id = "hiddenUserSchoolId_" + (i) })
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+
+                            </td>
+                            <td>
+                                <table>
+                                    @for (int i = ((Model.Schools.Count()) / 2); i <= Model.Schools.Count() - 1; i++)
+                                    {
+                                        var className = Model.Schools[i].IsLocked ? "DCB" : "SCB";
+                                        <tr>
+                                            <td width="300px">
+                                                @Html.CheckBoxFor(m => m.Schools[i].Checked, new { @id = "userSchoolId_" + i, @class = className })
+                                                @Html.DisplayFor(m => m.Schools[i].Text)
+                                                @Html.HiddenFor(m => m.Schools[i].Id, new { @id = "hiddenUserSchoolId_" + (i) })
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><span class="requiredMessage" id="requiredCheckbox"></span></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+
+
+
+
+    </div>
+
+    <input type="hidden" id="SelectedSchools" name="SelectedSchools" />
+}
+
+<hr />
+
+<div class="row">
+    <div class="col-lg-12">
+        <button id="btnAddUser" class="btn btn-primary">
+            <span class="glyphicon glyphicon-save"></span>&nbsp;Add Teacher / Administrator
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/app/createUser.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $('input:text').addClass("form-control");
+            $('.DCB').attr("disabled", true);
+            createUser.clickSaveUser();
+            createUser.checkboxValidation('@ViewBag.SchoolMessage')
+            createUser.backButtonClick();
+        });
+    </script>
+}

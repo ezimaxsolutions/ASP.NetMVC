@@ -1,0 +1,47 @@
+﻿@model EDS.SchoolTeacher
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>SchoolTeacher</h4>
+        <hr />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.SchoolDesc)
+
+        @Html.HiddenFor(model => model.FirstName)
+
+        @Html.HiddenFor(model => model.LastName)
+
+        @Html.HiddenFor(model => model.SchoolId)
+
+        @Html.HiddenFor(model => model.RoleId)
+
+        @Html.HiddenFor(model => model.UserEmail)
+
+        @Html.HiddenFor(model => model.UserId)
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
